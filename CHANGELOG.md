@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.0...v0.2.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* rename analyzer package to singular ([866528b](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/866528ba77c0a9c82c6645b5676db3fc650f37c0))
+
 ## [0.2.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.1.0...v0.2.0) (2026-06-04)
 
 
