@@ -27,8 +27,8 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
         "/StartupGuards.cs",
         "/StartupEnvironmentLoader.cs",
         "/Program.cs",
-        "/Meridian.CLI/",
-        "/Meridian.OpenApiExporter/",
+        "/Cli/",
+        "/OpenApiExporter/",
         "/tools/",
         "/Tools/"
     };

@@ -9,7 +9,7 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
     public async Task ReportsOutputCacheOnActionWithFeatureConsumptionAsync()
     {
         const string source = """
-public sealed class SearchController : BaseApiController
+public sealed class SearchController : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(Duration = 120)]
@@ -28,7 +28,7 @@ public sealed class SearchController : BaseApiController
     {
         const string source = """
 [OutputCache(Duration = 120)]
-public sealed class ReportsController : BaseApiController
+public sealed class ReportsController : ApiControllerBase
 {
     [HttpGet]
     [TenantScoped]
@@ -46,7 +46,7 @@ public sealed class ReportsController : BaseApiController
     {
         const string source = """
 [OutputCache(Duration = 120)]
-public sealed class ReportsController : BaseApiController
+public sealed class ReportsController : ApiControllerBase
 {
     [HttpGet]
     [TenantScoped]
@@ -69,7 +69,7 @@ public sealed class ReportsController : BaseApiController
         const string source = """
 [OutputCache(Duration = 120)]
 [TenantScoped]
-public sealed class ReportsController : BaseApiController
+public sealed class ReportsController : ApiControllerBase
 {
     [HttpGet]
     public object GetReport() => new();
@@ -85,7 +85,7 @@ public sealed class ReportsController : BaseApiController
     public async Task DoesNotReportOutputCacheWithoutSensitiveMetadataAsync()
     {
         const string source = """
-public sealed class GreenspaceController : BaseApiController
+public sealed class GreenspaceController : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(Duration = 120)]
@@ -102,7 +102,7 @@ public sealed class GreenspaceController : BaseApiController
     public async Task ReportsOutputCacheWithExplicitAuthorizationPolicyAsync()
     {
         const string source = """
-public sealed class AdminController : BaseApiController
+public sealed class AdminController : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(Duration = 120)]
@@ -120,7 +120,7 @@ public sealed class AdminController : BaseApiController
     public async Task DoesNotReportOutputCacheWithAuthenticationOnlyMetadataAsync()
     {
         const string source = """
-public sealed class ReferenceController : BaseApiController
+public sealed class ReferenceController : ApiControllerBase
 {
     [HttpGet]
     [OutputCache(Duration = 120)]

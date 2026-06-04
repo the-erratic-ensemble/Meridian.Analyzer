@@ -18,7 +18,7 @@ public sealed class FeatureService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Services/FeatureService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Services/FeatureService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0007ContainRawConfigurationReadsAnalyzer.DiagnosticId);
     }
@@ -36,7 +36,7 @@ public sealed class ReportsOptionsBinder
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Options/ReportsOptionsBinder.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Options/ReportsOptionsBinder.cs");
 
         diagnostics.Should().BeEmpty();
     }

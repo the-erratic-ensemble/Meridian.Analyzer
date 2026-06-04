@@ -18,7 +18,7 @@ public sealed class EmailRegistration
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Communications/EmailRegistration.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Communications/EmailRegistration.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0008ContainStartupBypassFlagsAnalyzer.DiagnosticId);
     }
@@ -36,7 +36,7 @@ public sealed class ReportRegistration
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/ReportsServiceRegistrationExtensions.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/ReportsServiceRegistrationExtensions.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0008ContainStartupBypassFlagsAnalyzer.DiagnosticId);
     }
@@ -54,7 +54,7 @@ public sealed class ReportRegistration
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/ReportsServiceRegistrationExtensions.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/ReportsServiceRegistrationExtensions.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0008ContainStartupBypassFlagsAnalyzer.DiagnosticId);
     }
@@ -74,7 +74,7 @@ public sealed class ReportRegistration
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/ReportsServiceRegistrationExtensions.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/ReportsServiceRegistrationExtensions.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0008ContainStartupBypassFlagsAnalyzer.DiagnosticId);
     }
@@ -92,7 +92,7 @@ public static class StartupGuards
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Infrastructure/Startup/StartupGuards.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Infrastructure/Startup/StartupGuards.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -110,7 +110,7 @@ public sealed class EnvironmentReader
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Infrastructure/Startup/StartupEnvironmentLoader.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Infrastructure/Startup/StartupEnvironmentLoader.cs");
 
         diagnostics.Should().BeEmpty();
     }

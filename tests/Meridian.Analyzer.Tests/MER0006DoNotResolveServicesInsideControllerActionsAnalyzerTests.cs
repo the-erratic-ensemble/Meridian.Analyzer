@@ -9,7 +9,7 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzerTe
     public async Task ReportsRequestServicesResolutionInsideControllerActionAsync()
     {
         const string source = """
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     public object GetStatus()
@@ -29,7 +29,7 @@ public sealed class ReportStatusController : BaseApiController
     public async Task ReportsServiceProviderResolutionInsideControllerActionAsync()
     {
         const string source = """
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -62,7 +62,7 @@ public static class ServiceProviderServiceExtensions
     public static T GetRequiredService<T>(this IServiceProvider provider) => default!;
 }
 
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     public object GetStatus(IServiceProvider provider)
@@ -81,7 +81,7 @@ public sealed class ReportStatusController : BaseApiController
     public async Task DoesNotReportNonServiceProviderTargetWithServiceProviderNameAsync()
     {
         const string source = """
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     public object GetStatus(string serviceProvider)
@@ -118,7 +118,7 @@ public sealed class ReportControllerCoordinator
     public async Task DoesNotReportFromServicesActionParameterAsync()
     {
         const string source = """
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     public object GetStatus([FromServices] IReportService reportService)

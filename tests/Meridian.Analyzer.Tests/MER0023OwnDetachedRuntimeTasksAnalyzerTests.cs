@@ -57,7 +57,7 @@ public sealed class CliCommand
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0023OwnDetachedRuntimeTasksAnalyzer(),
-            "apps/backend/Meridian.CLI/Commands/CliCommand.cs");
+            "src/Cli/Commands/CliCommand.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -67,6 +67,6 @@ public sealed class CliCommand
         return await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0023OwnDetachedRuntimeTasksAnalyzer(),
-            "apps/backend/Meridian.API/Features/Reference/WarmupService.cs");
+            "src/Api/Features/Reference/WarmupService.cs");
     }
 }

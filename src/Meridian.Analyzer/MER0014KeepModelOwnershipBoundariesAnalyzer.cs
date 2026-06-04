@@ -11,10 +11,10 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
 {
     public const string DiagnosticId = "MER0014";
 
-    private static readonly LocalizableString Title = "Keep backend model ownership boundaries";
-    private static readonly LocalizableString MessageFormat = "Review this model placement against Meridian DTO/entity ownership conventions";
+    private static readonly LocalizableString Title = "Keep model ownership clear";
+    private static readonly LocalizableString MessageFormat = "Review this model placement against the package's DTO and entity ownership conventions";
     private static readonly LocalizableString Description =
-        "HTTP DTOs should stay feature-local, persistence entities should stay in the database entity boundary, and Core models should not carry EF persistence attributes.";
+        "HTTP DTOs should stay feature-local, persistence entities should stay in dedicated entity folders, and Core models should not carry EF persistence attributes.";
 
     private static readonly string[] EntityApprovedPathSegments =
     {
@@ -74,7 +74,7 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
             return;
         }
 
-        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Core/") &&
+        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Core/") &&
             HasPersistenceAttribute(classDeclaration))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation()));
@@ -91,8 +91,8 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
 
     private static bool IsSharedOrCoreProject(string filePath)
     {
-        return MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Shared/") ||
-               MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Core/");
+        return MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Shared/") ||
+               MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Core/");
     }
 
     private static bool HasPersistenceAttribute(ClassDeclarationSyntax classDeclaration)

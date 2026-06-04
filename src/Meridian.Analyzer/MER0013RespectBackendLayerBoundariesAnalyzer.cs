@@ -11,11 +11,11 @@ public sealed class MER0013RespectBackendLayerBoundariesAnalyzer : DiagnosticAna
 {
     public const string DiagnosticId = "MER0013";
 
-    private static readonly LocalizableString Title = "Respect Meridian backend layer boundaries";
-    private static readonly LocalizableString MessageFormat = "Remove this dependency because it crosses a documented Meridian backend layer boundary";
+    private static readonly LocalizableString Title = "Respect application layer boundaries";
+    private static readonly LocalizableString MessageFormat = "Remove this dependency because it crosses a documented application layering rule";
     private static readonly LocalizableString Description =
-        "Meridian backend projects follow Clean Architecture dependency flow. " +
-        "Core must not depend on API, Infrastructure, EF Core, or ASP.NET Core; Infrastructure must not depend on API; Shared must not depend on backend projects; Analytics must not use the standard MeridianDbContext/PostgreSQL repository boundary.";
+        "These projects follow a Clean Architecture-style dependency flow. " +
+        "Core must not depend on API, Infrastructure, EF Core, or ASP.NET Core; Infrastructure must not depend on API; Shared must not depend on application projects; Analytics must not use the standard AppDbContext/PostgreSQL repository path.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -81,7 +81,7 @@ public sealed class MER0013RespectBackendLayerBoundariesAnalyzer : DiagnosticAna
         {
             foreach (var identifier in compilationUnit.DescendantNodes().OfType<IdentifierNameSyntax>())
             {
-                if (identifier.Identifier.ValueText == "MeridianDbContext" &&
+                if (identifier.Identifier.ValueText == "AppDbContext" &&
                     identifier.FirstAncestorOrSelf<QualifiedNameSyntax>() is null &&
                     identifier.FirstAncestorOrSelf<AliasQualifiedNameSyntax>() is null)
                 {
@@ -93,22 +93,22 @@ public sealed class MER0013RespectBackendLayerBoundariesAnalyzer : DiagnosticAna
 
     private static BackendProject? GetProjectFromPath(string filePath)
     {
-        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Core/"))
+        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Core/"))
         {
             return BackendProject.Core;
         }
 
-        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Infrastructure/"))
+        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Infrastructure/"))
         {
             return BackendProject.Infrastructure;
         }
 
-        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Shared/"))
+        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Shared/"))
         {
             return BackendProject.Shared;
         }
 
-        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Meridian.Analytics/"))
+        if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Analytics/"))
         {
             return BackendProject.Analytics;
         }
@@ -122,17 +122,17 @@ public sealed class MER0013RespectBackendLayerBoundariesAnalyzer : DiagnosticAna
         {
             BackendProject.Core => StartsWithAny(
                 usingName,
-                "Meridian.API",
-                "Meridian.Infrastructure",
+                "Api",
+                "Infrastructure",
                 "Microsoft.AspNetCore",
                 "Microsoft.EntityFrameworkCore"),
-            BackendProject.Infrastructure => StartsWithAny(usingName, "Meridian.API"),
+            BackendProject.Infrastructure => StartsWithAny(usingName, "Api"),
             BackendProject.Shared => StartsWithAny(
                 usingName,
-                "Meridian.API",
-                "Meridian.Core",
-                "Meridian.Infrastructure"),
-            BackendProject.Analytics => StartsWithAny(usingName, "Meridian.Infrastructure.Database"),
+                "Api",
+                "Core",
+                "Infrastructure"),
+            BackendProject.Analytics => StartsWithAny(usingName, "Infrastructure.Database"),
             _ => false
         };
     }

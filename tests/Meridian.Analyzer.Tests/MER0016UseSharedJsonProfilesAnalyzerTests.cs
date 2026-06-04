@@ -18,7 +18,7 @@ public sealed class DomainDetailMapper
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Domain/DomainDetailMapper.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Domain/DomainDetailMapper.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0016UseSharedJsonProfilesAnalyzer.DiagnosticId);
     }
@@ -36,7 +36,7 @@ public sealed class ReportJsonOptionsFactory
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/ReportJsonOptionsFactory.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/ReportJsonOptionsFactory.cs");
 
         diagnostics.Should().BeEmpty();
     }

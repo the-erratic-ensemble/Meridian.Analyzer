@@ -10,14 +10,14 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzerTests
     public async Task ReportsEntityOutsideDatabaseEntityBoundaryAsync()
     {
         const string source = """
-namespace Meridian.Core.Models;
+namespace Core.Models;
 
 public sealed class ReportEntity
 {
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Core/Models/ReportEntity.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Core/Models/ReportEntity.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0014KeepModelOwnershipBoundariesAnalyzer.DiagnosticId);
     }
@@ -39,14 +39,14 @@ public sealed class ReportEntity
     public async Task DoesNotReportEntityInsideDatabaseEntityBoundaryAsync()
     {
         const string source = """
-namespace Meridian.Shared.Database.Entities;
+namespace Shared.Database.Entities;
 
 public sealed class ReportEntity
 {
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Shared/Database/Entities/ReportEntity.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Shared/Database/Entities/ReportEntity.cs");
 
         diagnostics.Should().BeEmpty();
     }

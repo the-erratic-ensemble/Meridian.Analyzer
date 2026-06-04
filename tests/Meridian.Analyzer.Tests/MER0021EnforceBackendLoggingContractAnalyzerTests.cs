@@ -17,7 +17,7 @@ public sealed class ReferenceDataService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reference/ReferenceDataService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reference/ReferenceDataService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0021EnforceBackendLoggingContractAnalyzer.DiagnosticId);
     }
@@ -35,7 +35,7 @@ public sealed class StartupPipelineConfigurator
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/StartupPipelineConfigurator.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/StartupPipelineConfigurator.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0021EnforceBackendLoggingContractAnalyzer.DiagnosticId);
     }
@@ -52,7 +52,7 @@ public sealed class RequestLoggingMiddleware
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Middleware/RequestLoggingMiddleware.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Middleware/RequestLoggingMiddleware.cs");
 
         diagnostics.Should().BeEmpty();
     }

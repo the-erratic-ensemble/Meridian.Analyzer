@@ -62,7 +62,7 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
     private static readonly string[] ApprovedPathSegments =
     {
         "/Migrations/",
-        "/Meridian.CLI/",
+        "/Cli/",
         "/tools/"
     };
 

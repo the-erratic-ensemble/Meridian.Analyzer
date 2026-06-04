@@ -1,14 +1,14 @@
 # Guide
 
-## Package Contracts
+## Stable Pieces
 
-These contracts should stay stable:
+These pieces should stay stable:
 
 - Analyzer IDs stay under the `MER` namespace.
 - Rule IDs should remain stable once published.
-- `src/Meridian.Analyzer/Meridian.Analyzer.csproj` is the canonical implementation surface.
-- `tests/Meridian.Analyzer.Tests/` is the canonical behavior test surface.
-- `docs` is the canonical documentation surface.
+- Source lives under `src/Meridian.Analyzer/`.
+- Tests live under `tests/Meridian.Analyzer.Tests/`.
+- Docs live under `docs/`.
 - `version.txt` is the standalone release version surface and is managed by `release-please`.
 
 ## Adding A Rule
@@ -37,7 +37,7 @@ Before shipping a new rule, check for overlap with:
 - StyleCop
 - SDK / NetAnalyzers
 
-If another analyzer already owns the same refactor pressure, narrow the rule instead of normalizing duplicate reporting.
+If another analyzer already covers the same pattern, narrow the rule instead of duplicating the diagnostic.
 
 For `MER0002`, keep broader catch quality with Sonar/SDK analyzers and only own the specific nested broad-catch fallback shape.
 
@@ -66,4 +66,4 @@ dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifac
 
 - Keep the table in `README.md` current.
 - Give each rule its own file under `docs/rules/`.
-- Keep the stable contract in the rule doc and keep historical rollout notes out of the public package surface unless they materially help consumers.
+- Keep the rule docs focused on stable behavior. Leave historical rollout notes out unless consumers need them.

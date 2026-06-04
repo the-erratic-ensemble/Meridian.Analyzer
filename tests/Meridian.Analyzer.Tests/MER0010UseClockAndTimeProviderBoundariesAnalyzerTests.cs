@@ -18,7 +18,7 @@ public sealed class ReportService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Services/ReportService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Services/ReportService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0010UseClockAndTimeProviderBoundariesAnalyzer.DiagnosticId);
     }
@@ -36,7 +36,7 @@ public sealed class ReportService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Services/ReportService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Services/ReportService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0010UseClockAndTimeProviderBoundariesAnalyzer.DiagnosticId);
     }
@@ -45,7 +45,7 @@ public sealed class ReportService
     public async Task DoesNotReportDirectUtcNowInsideClockBoundaryAsync()
     {
         const string source = """
-public sealed class MeridianClock
+public sealed class SystemClock
 {
     public DateTime UtcNow()
     {
@@ -54,7 +54,7 @@ public sealed class MeridianClock
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Shared/Clock/MeridianClock.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Shared/Clock/SystemClock.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -69,7 +69,7 @@ public sealed class ReportEntity
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Shared/Database/Entities/ReportEntity.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Shared/Database/Entities/ReportEntity.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -87,7 +87,7 @@ public sealed class ReportEntity
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Shared/Database/Entities/ReportEntity.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Shared/Database/Entities/ReportEntity.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0010UseClockAndTimeProviderBoundariesAnalyzer.DiagnosticId);
     }

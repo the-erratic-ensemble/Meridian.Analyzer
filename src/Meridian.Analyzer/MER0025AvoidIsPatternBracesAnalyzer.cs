@@ -13,9 +13,9 @@ public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
 
     private static readonly LocalizableString Title = "Avoid empty is-pattern brace syntax";
     private static readonly LocalizableString MessageFormat =
-        "Avoid empty brace pattern syntax in '{0}'; prefer Meridian.Shared helpers or explicit null checks where applicable";
+        "Avoid empty brace pattern syntax in '{0}'; prefer Shared helpers or explicit null checks where applicable";
     private static readonly LocalizableString Description =
-        "Empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })` hide the shared helper and explicit null-check contracts used across Meridian backend code.";
+        "Empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })` hide the shared helper and explicit null-check patterns used across the codebase.";
 
     private static readonly string[] ExcludedPathSegments =
     {

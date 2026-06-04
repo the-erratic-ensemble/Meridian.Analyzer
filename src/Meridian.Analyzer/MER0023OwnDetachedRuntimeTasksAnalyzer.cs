@@ -12,14 +12,14 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0023";
 
     private static readonly LocalizableString Title = "Own detached runtime tasks and cancellation";
-    private static readonly LocalizableString MessageFormat = "Runtime background work should have an owned lifetime, cancellation path, and observability boundary";
+    private static readonly LocalizableString MessageFormat = "Runtime background work should have an explicit lifetime, cancellation path, and observability path";
     private static readonly LocalizableString Description =
         "Detached Task.Run, fire-and-forget async calls, and broad CancellationToken.None usage hide failures, shutdown behavior, and request cancellation semantics.";
 
     private static readonly string[] ApprovedPathSegments =
     {
         "/Migrations/",
-        "/Meridian.CLI/",
+        "/Cli/",
         "/Meridian.Analyzer/",
         "/tools/",
         "/Tools/"

@@ -11,10 +11,10 @@ public sealed class MER0009RequireControllerCancellationTokenAnalyzer : Diagnost
 {
     public const string DiagnosticId = "MER0009";
 
-    private static readonly LocalizableString Title = "Expose cancellation at async controller boundaries";
+    private static readonly LocalizableString Title = "Expose cancellation in async controller actions";
     private static readonly LocalizableString MessageFormat = "Async controller actions should accept a CancellationToken and avoid CancellationToken.None in request-scoped code";
     private static readonly LocalizableString Description =
-        "Meridian controller actions are request boundaries. Async actions should expose request cancellation and should not intentionally detach work from the request token.";
+        "Controller actions are request boundaries. Async actions should expose request cancellation and should not intentionally detach work from the request token.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,

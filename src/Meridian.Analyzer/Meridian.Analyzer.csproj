@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Meridian.Analyzer</Title>
-    <Description>Roslyn analyzers for backend readability, architecture, security, reliability, and performance contracts.</Description>
+    <Description>Roslyn analyzers for ASP.NET Core codebases with opinionated readability, architecture, security, reliability, and performance rules.</Description>
     <Authors>the-erratic-ensemble</Authors>
     <Company>the-erratic-ensemble</Company>
     <IsPackable>true</IsPackable>

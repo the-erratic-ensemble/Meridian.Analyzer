@@ -18,7 +18,7 @@ public sealed class ReportRepository
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Infrastructure/Repositories/ReportRepository.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0018ContainRawSqlAnalyzer.DiagnosticId);
     }
@@ -36,7 +36,7 @@ public sealed class ReportRepository
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Infrastructure/Repositories/ReportRepository.cs");
 
         diagnostics.Should().BeEmpty();
     }

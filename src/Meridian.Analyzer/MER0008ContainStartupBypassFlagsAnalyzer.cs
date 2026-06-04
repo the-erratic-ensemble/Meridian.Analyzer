@@ -13,11 +13,11 @@ public sealed class MER0008ContainStartupBypassFlagsAnalyzer : DiagnosticAnalyze
 
     private const string StartupBypassPrefix = "MERIDIAN_SKIP_";
 
-    private static readonly LocalizableString Title = "Keep startup bypass flags inside approved startup guard boundaries";
-    private static readonly LocalizableString MessageFormat = "Move MERIDIAN_SKIP_* access behind StartupGuards or a dedicated typed startup-skip options boundary";
+    private static readonly LocalizableString Title = "Keep startup bypass flags inside startup guard code";
+    private static readonly LocalizableString MessageFormat = "Move MERIDIAN_SKIP_* access behind StartupGuards or dedicated typed startup-skip options";
     private static readonly LocalizableString Description =
         "MERIDIAN_SKIP_* flags can disable production-significant validation or services. " +
-        "Raw reads should stay in StartupGuards, tests, or a dedicated typed startup-skip options boundary.";
+        "Raw reads should stay in StartupGuards, tests, or dedicated typed startup-skip options.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,

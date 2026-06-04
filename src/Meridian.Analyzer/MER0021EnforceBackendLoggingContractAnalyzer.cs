@@ -11,10 +11,10 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
 {
     public const string DiagnosticId = "MER0021";
 
-    private static readonly LocalizableString Title = "Use the backend Serilog logging contract";
-    private static readonly LocalizableString MessageFormat = "Avoid Microsoft ILogger<T> or Console logging in production backend code outside framework-edge boundaries";
+    private static readonly LocalizableString Title = "Use Serilog in runtime code";
+    private static readonly LocalizableString MessageFormat = "Avoid Microsoft ILogger<T> or Console logging in runtime code outside framework adapters";
     private static readonly LocalizableString Description =
-        "Meridian backend runtime code standardises on Serilog. Microsoft ILogger<T> and Console output should stay in framework adapters, hosting edges, CLI/tools, or explicitly documented exceptions.";
+        "Runtime code standardizes on Serilog. Microsoft ILogger<T> and Console output should stay in framework adapters, hosting edges, CLI tools, or explicitly documented exceptions.";
 
     private static readonly string[] ApprovedPathSegments =
     {
@@ -29,8 +29,8 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
         "/Program.cs",
         "/Startup/",
         "/Telemetry/",
-        "/Meridian.CLI/",
-        "/Meridian.OpenApiExporter/",
+        "/Cli/",
+        "/OpenApiExporter/",
         "/Meridian.Analyzer/",
         "/tools/",
         "/Tools/"

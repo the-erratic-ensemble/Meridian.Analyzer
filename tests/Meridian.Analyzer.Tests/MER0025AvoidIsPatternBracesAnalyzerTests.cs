@@ -211,7 +211,7 @@ public sealed class DensityTests
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0025AvoidIsPatternBracesAnalyzer(),
-            "apps/backend/tests/Meridian.API.Tests/Services/DensityTests.cs");
+            "src/tests/Api.Tests/Services/DensityTests.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -232,7 +232,7 @@ public sealed class PatternWalker
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0025AvoidIsPatternBracesAnalyzer(),
-            "apps/backend/Meridian.Analyzer/PatternWalker.cs");
+            "src/Meridian.Analyzer/PatternWalker.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -242,7 +242,7 @@ public sealed class PatternWalker
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0025AvoidIsPatternBracesAnalyzer(),
-            "apps/backend/Meridian.API/Features/Reference/DensityService.cs");
+            "src/Api/Features/Reference/DensityService.cs");
 
         return diagnostics;
     }
