@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.1...v0.2.2) (2026-06-04)
+
+
+### Bug Fixes
+
+* polish public package surfaces ([0c25266](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/0c2526615b81c4c5818db0088f3a43d2c15b38a8))
+
 ## [0.2.1](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.0...v0.2.1) (2026-06-04)
 
 
