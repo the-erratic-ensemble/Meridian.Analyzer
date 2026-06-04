@@ -12,9 +12,9 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0018";
 
     private static readonly LocalizableString Title = "Contain raw SQL APIs";
-    private static readonly LocalizableString MessageFormat = "Keep raw SQL in approved persistence boundaries and prefer interpolated APIs over raw SQL string construction";
+    private static readonly LocalizableString MessageFormat = "Keep raw SQL in persistence code and prefer interpolated APIs over raw SQL string construction";
     private static readonly LocalizableString Description =
-        "Raw SQL in request/runtime code and unsafe raw SQL APIs are high-risk. SQL should live in repositories, migrations, CLI schema tools, or another named persistence boundary.";
+        "Raw SQL in request or runtime code is high-risk. SQL should live in repositories, migrations, CLI schema tools, or another named persistence path.";
 
     private static readonly string[] RawSqlMethodNames =
     {
@@ -37,7 +37,7 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
         "/Persistence/",
         "/Repositories/",
         "/Repository/",
-        "/Meridian.CLI/",
+        "/Cli/",
         "/tools/"
     };
 

@@ -35,7 +35,7 @@ internal static class MeridianAnalyzerSyntaxHelpers
     internal static bool IsControllerClass(ClassDeclarationSyntax classDeclaration)
     {
         return classDeclaration.Identifier.ValueText.EndsWith("Controller", StringComparison.Ordinal) ||
-               InheritsFrom(classDeclaration, "ControllerBase", "BaseApiController", "BaseAdminController");
+               InheritsFrom(classDeclaration, "ControllerBase", "ApiControllerBase", "AdminControllerBase");
     }
 
     internal static bool HasHttpMethodAttribute(MethodDeclarationSyntax methodDeclaration)

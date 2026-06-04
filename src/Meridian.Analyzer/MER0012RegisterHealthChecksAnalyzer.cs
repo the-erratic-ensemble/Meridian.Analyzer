@@ -14,7 +14,7 @@ public sealed class MER0012RegisterHealthChecksAnalyzer : DiagnosticAnalyzer
 
     private const string HealthCheckInterfaceName = "IHealthCheck";
     private const string HealthCheckInterfaceNamespace = "Microsoft.Extensions.Diagnostics.HealthChecks";
-    private const string HostAssemblyName = "Meridian.API";
+    private const string HostAssemblyName = "Api";
 
     private static readonly LocalizableString Title = "Register IHealthCheck implementations";
     private static readonly LocalizableString MessageFormat = "IHealthCheck implementations should have a matching AddHealthChecks registration";

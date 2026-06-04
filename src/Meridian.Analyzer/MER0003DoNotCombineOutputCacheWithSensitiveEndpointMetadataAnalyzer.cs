@@ -12,10 +12,10 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
     public const string DiagnosticId = "MER0003";
 
     private static readonly LocalizableString Title = "Do not cache tenant, entitlement, quota, or policy-sensitive endpoints";
-    private static readonly LocalizableString MessageFormat = "Remove [OutputCache] from endpoints with tenant, entitlement, quota, plan, or explicit policy metadata unless a reviewed persona-safe policy exists";
+    private static readonly LocalizableString MessageFormat = "Remove [OutputCache] from endpoints with tenant, entitlement, quota, plan, or explicit policy metadata unless the cache policy is clearly safe";
     private static readonly LocalizableString Description =
-        "Output-cache hits skip action execution and can bypass Meridian entitlement, quota, tenant, plan, or persona-sensitive checks. " +
-        "Use no-store response caching or a reviewed persona-safe cache policy instead.";
+        "Output-cache hits skip action execution and can bypass tenant, entitlement, quota, plan, or other sensitive checks. " +
+        "Use no-store response caching or a cache policy that is clearly safe instead.";
 
     private static readonly string[] SensitiveAttributeNames =
     {

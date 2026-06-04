@@ -18,7 +18,7 @@ public sealed class ReportService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Services/ReportService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Services/ReportService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0015PreferMeridianStringHelpersAnalyzer.DiagnosticId);
     }
@@ -43,7 +43,7 @@ public sealed class ReportRepository
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Infrastructure/Repositories/ReportRepository.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -69,7 +69,7 @@ public sealed class ReportRepository
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Infrastructure/Repositories/ReportRepository.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -96,7 +96,7 @@ public sealed class ReportRepository
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Infrastructure/Repositories/ReportRepository.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -122,7 +122,7 @@ public sealed class ReportService
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Services/ReportService.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Services/ReportService.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0015PreferMeridianStringHelpersAnalyzer.DiagnosticId);
     }

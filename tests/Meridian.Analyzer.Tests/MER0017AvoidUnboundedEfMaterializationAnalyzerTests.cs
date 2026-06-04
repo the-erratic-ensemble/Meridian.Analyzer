@@ -236,6 +236,6 @@ public sealed class ReportRepository
         return await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0017AvoidUnboundedEfMaterializationAnalyzer(),
-            "apps/backend/Meridian.Infrastructure/Repositories/ReportRepository.cs");
+            "src/Infrastructure/Repositories/ReportRepository.cs");
     }
 }

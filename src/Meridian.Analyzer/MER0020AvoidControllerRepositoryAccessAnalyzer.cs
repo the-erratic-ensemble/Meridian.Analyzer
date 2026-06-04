@@ -12,9 +12,9 @@ public sealed class MER0020AvoidControllerRepositoryAccessAnalyzer : DiagnosticA
     public const string DiagnosticId = "MER0020";
 
     private static readonly LocalizableString Title = "Keep controller actions out of repository and DbContext details";
-    private static readonly LocalizableString MessageFormat = "Controller actions should delegate repository/DbContext work to a service or facade boundary";
+    private static readonly LocalizableString MessageFormat = "Controller actions should delegate repository and DbContext work to a service or facade";
     private static readonly LocalizableString Description =
-        "Controllers should stay HTTP-focused. Direct repository, DbContext, or EF query work in action bodies grows coupling and bypasses feature-service contracts.";
+        "Controllers should stay HTTP-focused. Direct repository, DbContext, or EF query work in action bodies grows coupling and bypasses feature-service abstractions.";
 
     private static readonly string[] EfMethodNames =
     {

@@ -15,7 +15,7 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
     private const string RedisServerTypeNamespace = "StackExchange.Redis";
 
     private static readonly LocalizableString Title = "Contain Redis keyspace scans";
-    private static readonly LocalizableString MessageFormat = "Route Redis keyspace scans through an approved bounded helper";
+    private static readonly LocalizableString MessageFormat = "Route Redis keyspace scans through a dedicated bounded helper";
     private static readonly LocalizableString Description =
         "Direct IServer.Keys scans are operationally expensive and easy to duplicate. Runtime code should use a single bounded helper with cancellation, batching, and logging policy.";
 

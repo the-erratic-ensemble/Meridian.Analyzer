@@ -10,14 +10,14 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzerT
     {
         const string source = """
 [Route("api/admin/users")]
-public sealed class AdminUsersController : BaseAdminController
+public sealed class AdminUsersController : AdminControllerBase
 {
     [HttpGet]
     public object ListUsers() => new();
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Admin/Controllers/AdminUsersController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Admin/Controllers/AdminUsersController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
     }
@@ -28,14 +28,14 @@ public sealed class AdminUsersController : BaseAdminController
         const string source = """
 [Route("api/admin/users")]
 [Authorize(Policy = AuthorizationPolicies.PlatformAdminOnly)]
-public sealed class AdminUsersController : BaseAdminController
+public sealed class AdminUsersController : AdminControllerBase
 {
     [HttpGet]
     public object ListUsers() => new();
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Admin/Controllers/AdminUsersController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Admin/Controllers/AdminUsersController.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -46,7 +46,7 @@ public sealed class AdminUsersController : BaseAdminController
         const string metadataSource = """
 [Route("api/admin/reports")]
 [Authorize(Policy = AuthorizationPolicies.PlatformAdminOnly)]
-public sealed partial class AdminReportsController : BaseAdminController
+public sealed partial class AdminReportsController : AdminControllerBase
 {
 }
 """;
@@ -60,8 +60,8 @@ public sealed partial class AdminReportsController
 
         var diagnostics = await GetDiagnosticsAsync(
             new[] {
-                (Source: metadataSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminReportsController.cs"),
-                (Source: actionsSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminReportsController.Actions.cs")
+                (Source: metadataSource, Path: "src/Api/Features/Admin/Controllers/AdminReportsController.cs"),
+                (Source: actionsSource, Path: "src/Api/Features/Admin/Controllers/AdminReportsController.Actions.cs")
             });
 
         diagnostics.Should().BeEmpty();
@@ -72,7 +72,7 @@ public sealed partial class AdminReportsController
     {
         const string metadataSource = """
 [Route("api/admin/reports")]
-public sealed partial class AdminReportsController : BaseAdminController
+public sealed partial class AdminReportsController : AdminControllerBase
 {
 }
 """;
@@ -86,8 +86,8 @@ public sealed partial class AdminReportsController
 
         var diagnostics = await GetDiagnosticsAsync(
             new[] {
-                (Source: metadataSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminReportsController.cs"),
-                (Source: actionsSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminReportsController.Actions.cs")
+                (Source: metadataSource, Path: "src/Api/Features/Admin/Controllers/AdminReportsController.cs"),
+                (Source: actionsSource, Path: "src/Api/Features/Admin/Controllers/AdminReportsController.Actions.cs")
             });
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
@@ -98,7 +98,7 @@ public sealed partial class AdminReportsController
     {
         const string source = """
 [Route("api/admin/platform")]
-public sealed class AdminPlatformController : BaseAdminController
+public sealed class AdminPlatformController : AdminControllerBase
 {
     [HttpGet]
     [Authorize(Policy = AuthorizationPolicies.PlatformAdminOnly)]
@@ -106,7 +106,7 @@ public sealed class AdminPlatformController : BaseAdminController
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Admin/Controllers/AdminPlatformController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Admin/Controllers/AdminPlatformController.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -116,14 +116,14 @@ public sealed class AdminPlatformController : BaseAdminController
     {
         const string source = """
 [Route("api/reports")]
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     public object GetStatus() => new();
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Controllers/ReportStatusController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Controllers/ReportStatusController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
     }
@@ -133,7 +133,7 @@ public sealed class ReportStatusController : BaseApiController
     {
         const string source = """
 [Route("api/reports")]
-public sealed class ReportStatusController : BaseApiController
+public sealed class ReportStatusController : ApiControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
@@ -141,7 +141,7 @@ public sealed class ReportStatusController : BaseApiController
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Reports/Controllers/ReportStatusController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Reports/Controllers/ReportStatusController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
     }
@@ -151,7 +151,7 @@ public sealed class ReportStatusController : BaseApiController
     {
         const string source = """
 [Route("api/dev")]
-public sealed class DevController : BaseApiController
+public sealed class DevController : ApiControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
@@ -159,7 +159,7 @@ public sealed class DevController : BaseApiController
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Dev/Controllers/DevController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Dev/Controllers/DevController.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -168,7 +168,7 @@ public sealed class DevController : BaseApiController
     public async Task DoesNotReportApprovedAnonymousAnalyticsEventsActionsAsync()
     {
         const string source = """
-namespace Meridian.Analytics.Controllers;
+namespace Analytics.Controllers;
 
 [Route("api/[controller]")]
 public sealed class EventsController : ControllerBase
@@ -191,7 +191,7 @@ public sealed class EventsController : ControllerBase
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Analytics/Controllers/EventsController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Analytics/Controllers/EventsController.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -200,7 +200,7 @@ public sealed class EventsController : ControllerBase
     public async Task ReportsClassLevelAllowAnonymousOnAnalyticsEventsControllerAsync()
     {
         const string source = """
-namespace Meridian.Analytics.Controllers;
+namespace Analytics.Controllers;
 
 [Route("api/[controller]")]
 [AllowAnonymous]
@@ -211,7 +211,7 @@ public sealed class EventsController : ControllerBase
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Analytics/Controllers/EventsController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Analytics/Controllers/EventsController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
     }
@@ -220,7 +220,7 @@ public sealed class EventsController : ControllerBase
     public async Task ReportsUnexpectedAnonymousAnalyticsEventsActionAsync()
     {
         const string source = """
-namespace Meridian.Analytics.Controllers;
+namespace Analytics.Controllers;
 
 [Route("api/[controller]")]
 public sealed class EventsController : ControllerBase
@@ -231,7 +231,7 @@ public sealed class EventsController : ControllerBase
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Analytics/Controllers/EventsController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Analytics/Controllers/EventsController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer.DiagnosticId);
     }
@@ -240,7 +240,7 @@ public sealed class EventsController : ControllerBase
     public async Task DoesNotReportApprovedAnonymousAnalyticsEventsActionsAfterFileMoveAsync()
     {
         const string source = """
-namespace Meridian.Analytics.Controllers;
+namespace Analytics.Controllers;
 
 [Route("api/[controller]")]
 public sealed class EventsController : ControllerBase
@@ -251,7 +251,7 @@ public sealed class EventsController : ControllerBase
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.Analytics/Features/EventIngestion/EventsController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Analytics/Features/EventIngestion/EventsController.cs");
 
         diagnostics.Should().BeEmpty();
     }

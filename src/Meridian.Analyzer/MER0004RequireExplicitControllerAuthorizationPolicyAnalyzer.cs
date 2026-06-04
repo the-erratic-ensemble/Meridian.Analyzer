@@ -14,7 +14,7 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
     private static readonly LocalizableString Title = "Declare explicit authorization policy on high-risk controller surfaces";
     private static readonly LocalizableString MessageFormat = "Declare an explicit authorization policy on admin or high-risk controller actions instead of relying only on inherited [Authorize]";
     private static readonly LocalizableString Description =
-        "Base controller authorization proves authentication, not the required Meridian policy boundary. " +
+        "Base controller authorization proves authentication, not the required policy. " +
         "Admin and high-risk tenant/report/support/search/subscription/analytics controllers need explicit policy metadata.";
 
     private static readonly string[] HighRiskFeaturePathSegments =
@@ -45,7 +45,7 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         "Health"
     };
     private const string AnalyticsEventsControllerName = "EventsController";
-    private const string AnalyticsEventsControllerNamespace = "Meridian.Analytics.Controllers";
+    private const string AnalyticsEventsControllerNamespace = "Analytics.Controllers";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -167,7 +167,7 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
     private static bool IsAdminController(ClassDeclarationSyntax classDeclaration, string filePath)
     {
         return classDeclaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal) ||
-               MeridianAnalyzerSyntaxHelpers.InheritsFrom(classDeclaration, "BaseAdminController") ||
+               MeridianAnalyzerSyntaxHelpers.InheritsFrom(classDeclaration, "AdminControllerBase") ||
                MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Features/Admin/Controllers/") ||
                GetRouteTemplates(classDeclaration).Any(route => MeridianAnalyzerSyntaxHelpers.StartsWithOrdinal(route, "api/admin"));
     }

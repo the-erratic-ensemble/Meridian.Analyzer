@@ -11,14 +11,14 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
 {
     public const string DiagnosticId = "MER0010";
 
-    private static readonly LocalizableString Title = "Use Meridian clock or TimeProvider boundaries";
-    private static readonly LocalizableString MessageFormat = "Production runtime code should use IMeridianClock or TimeProvider instead of direct system time, raw Task.Delay, or raw timers";
+    private static readonly LocalizableString Title = "Use a clock abstraction or TimeProvider";
+    private static readonly LocalizableString MessageFormat = "Runtime code should use IClock or TimeProvider instead of direct system time, raw Task.Delay, or raw timers";
     private static readonly LocalizableString Description =
         "Direct time access and raw delays make request and background behaviour harder to test deterministically.";
 
     private static readonly string[] ApprovedBoundaryPathSegments =
     {
-        "/MeridianClock.cs",
+        "/SystemClock.cs",
         "/Clock/",
         "/Time/",
         "/Migrations/",

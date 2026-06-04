@@ -12,16 +12,16 @@ public sealed class MER0016UseSharedJsonProfilesAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0016";
 
     private static readonly LocalizableString Title = "Use shared Meridian JSON profiles";
-    private static readonly LocalizableString MessageFormat = "Move ad hoc JSON options into MeridianJsonProfiles or a named JSON options factory";
+    private static readonly LocalizableString MessageFormat = "Move ad hoc JSON options into JsonProfiles or a named JSON options factory";
     private static readonly LocalizableString Description =
         "Ad hoc System.Text.Json option construction in runtime code creates serializer drift. Shared profiles should own the option shape unless a dedicated factory documents the exception.";
 
     private static readonly string[] ApprovedPathSegments =
     {
-        "/MeridianJsonProfiles.cs",
+        "/JsonProfiles.cs",
         "/Migrations/",
-        "/Meridian.CLI/",
-        "/Meridian.OpenApiExporter/",
+        "/Cli/",
+        "/OpenApiExporter/",
         "/tools/"
     };
 

@@ -17,7 +17,7 @@ namespace StackExchange.Redis
     }
 }
 
-namespace Meridian.Infrastructure.Caching
+namespace Infrastructure.Caching
 {
 using StackExchange.Redis;
 
@@ -48,7 +48,7 @@ namespace StackExchange.Redis
     }
 }
 
-namespace Meridian.Infrastructure.Caching
+namespace Infrastructure.Caching
 {
 using StackExchange.Redis;
 
@@ -98,6 +98,6 @@ public sealed class RedisCacheService
         return await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0022ContainRedisKeyspaceScansAnalyzer(),
-            "apps/backend/Meridian.Infrastructure/Caching/RedisCacheService.cs");
+            "src/Infrastructure/Caching/RedisCacheService.cs");
     }
 }

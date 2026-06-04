@@ -11,10 +11,10 @@ public sealed class MER0019UseProblemDetailsBoundaryAnalyzer : DiagnosticAnalyze
 {
     public const string DiagnosticId = "MER0019";
 
-    private static readonly LocalizableString Title = "Use the shared ProblemDetails boundary";
+    private static readonly LocalizableString Title = "Use shared ProblemDetails helpers";
     private static readonly LocalizableString MessageFormat = "Controller actions should use shared ProblemDetails helpers instead of constructing ProblemDetails inline";
     private static readonly LocalizableString Description =
-        "Meridian controller errors should use the shared RFC 7807 mapping boundary so status codes, codes, and extensions remain consistent.";
+        "Controller errors should use shared RFC 7807 mapping helpers so status codes, codes, and extensions remain consistent.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,

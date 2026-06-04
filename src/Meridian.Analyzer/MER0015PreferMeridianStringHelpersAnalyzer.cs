@@ -12,10 +12,10 @@ public sealed class MER0015PreferMeridianStringHelpersAnalyzer : DiagnosticAnaly
 {
     public const string DiagnosticId = "MER0015";
 
-    private static readonly LocalizableString Title = "Prefer Meridian string helpers";
-    private static readonly LocalizableString MessageFormat = "Prefer Meridian.Shared string helpers for in-memory string normalization";
+    private static readonly LocalizableString Title = "Prefer shared string helpers";
+    private static readonly LocalizableString MessageFormat = "Prefer Shared string helpers for in-memory string normalization";
     private static readonly LocalizableString Description =
-        "StringExtensions centralises common Meridian string handling. In-memory runtime code should prefer helpers such as HasText, TrimToNull, OrEmpty, TrimUpper, TrimLower, NormalizePostcode, and RedactPostcode.";
+        "StringExtensions centralizes common string handling. In-memory runtime code should prefer helpers such as HasText, TrimToNull, OrEmpty, TrimUpper, TrimLower, NormalizePostcode, and RedactPostcode.";
 
     private static readonly string[] QueryMethodNames =
     {

@@ -51,7 +51,7 @@ public sealed class ReportsController : ControllerBase
     public async Task ReportsTypedDbContextCallInsideControllerActionAsync()
     {
         const string source = """
-public sealed class MeridianDbContext
+public sealed class AppDbContext
 {
     public object SaveChangesAsync()
     {
@@ -61,7 +61,7 @@ public sealed class MeridianDbContext
 
 public sealed class ReportsController : ControllerBase
 {
-    private readonly MeridianDbContext _context = new MeridianDbContext();
+    private readonly AppDbContext _context = new AppDbContext();
 
     [HttpPost]
     public object Save()

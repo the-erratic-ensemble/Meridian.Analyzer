@@ -45,9 +45,9 @@ The release workflow expects one GitHub repository secret:
 dotnet add package Meridian.Analyzer
 ```
 
-Configure severities in the consuming project's `.editorconfig` or equivalent analyzer settings.
+Configure severities in the target project's `.editorconfig` or equivalent analyzer settings.
 
-## Current Risks
+## Notes
 
-- `nuget.org` publication is public by default.
+- `nuget.org` publishes packages publicly.
 - If you rename the package ID or GitHub repo again later, update `README.md`, `version.txt`, and the workflow files in one change.

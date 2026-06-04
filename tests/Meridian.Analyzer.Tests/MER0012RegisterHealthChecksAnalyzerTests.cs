@@ -23,8 +23,8 @@ public sealed class ReadyHealthCheck : IHealthCheck
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0012RegisterHealthChecksAnalyzer(),
-            "apps/backend/Meridian.API/Health/ReadyHealthCheck.cs",
-            assemblyName: "Meridian.API");
+            "src/Api/Health/ReadyHealthCheck.cs",
+            assemblyName: "Api");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0012RegisterHealthChecksAnalyzer.DiagnosticId);
     }
@@ -58,11 +58,11 @@ public sealed class HealthRegistration
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             new[]
             {
-                (Source: healthCheckSource, Path: "apps/backend/Meridian.API/Health/ReadyHealthCheck.cs"),
-                (Source: registrationSource, Path: "apps/backend/Meridian.API/Health/HealthRegistration.cs")
+                (Source: healthCheckSource, Path: "src/Api/Health/ReadyHealthCheck.cs"),
+                (Source: registrationSource, Path: "src/Api/Health/HealthRegistration.cs")
             },
             new MER0012RegisterHealthChecksAnalyzer(),
-            assemblyName: "Meridian.API");
+            assemblyName: "Api");
 
         diagnostics.Should().BeEmpty();
     }
@@ -85,8 +85,8 @@ public sealed class ReadyHealthCheck : IHealthCheck
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0012RegisterHealthChecksAnalyzer(),
-            "apps/backend/Meridian.API/Health/ReadyHealthCheck.cs",
-            assemblyName: "Meridian.API");
+            "src/Api/Health/ReadyHealthCheck.cs",
+            assemblyName: "Api");
 
         diagnostics.Should().BeEmpty();
     }
@@ -109,8 +109,8 @@ public sealed class ReadyHealthCheck : IHealthCheck
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0012RegisterHealthChecksAnalyzer(),
-            "apps/backend/Meridian.Infrastructure/Health/ReadyHealthCheck.cs",
-            assemblyName: "Meridian.Infrastructure");
+            "src/Infrastructure/Health/ReadyHealthCheck.cs",
+            assemblyName: "Infrastructure");
 
         diagnostics.Should().BeEmpty();
     }
@@ -133,8 +133,8 @@ internal sealed class ReadyHealthCheck : IHealthCheck
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0012RegisterHealthChecksAnalyzer(),
-            "apps/backend/Meridian.Infrastructure/Health/ReadyHealthCheck.cs",
-            assemblyName: "Meridian.Infrastructure");
+            "src/Infrastructure/Health/ReadyHealthCheck.cs",
+            assemblyName: "Infrastructure");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0012RegisterHealthChecksAnalyzer.DiagnosticId);
     }

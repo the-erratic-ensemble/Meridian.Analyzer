@@ -16,4 +16,4 @@ Use one of these paths instead:
    - a minimal reproduction
    - impact and expected fix window if known
 
-I will acknowledge receipt, reproduce the issue, and ship a fix or mitigation as quickly as practical.
+The repository owner will acknowledge receipt, reproduce the issue, and ship a fix or mitigation as quickly as practical.

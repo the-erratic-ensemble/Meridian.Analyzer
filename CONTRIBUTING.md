@@ -9,8 +9,8 @@
 
 ## Scope
 
-- Standalone package work should be reproducible from this repo with `dotnet test` and `dotnet pack`.
-- Consumer-specific rollout or severity policy belongs in the consuming project.
+- This repo should stay reproducible with `dotnet test` and `dotnet pack`.
+- Severity policy belongs in the projects that consume the package.
 
 ## Local Edit Loop
 
@@ -41,6 +41,6 @@ When you add or materially change a rule:
 - `fix:` drives patch bumps.
 - `feat:` drives minor bumps.
 - `feat!:` or `fix!:` drives major bumps.
-- `release-please` owns `CHANGELOG.md` and `version.txt`.
+- `release-please` updates `CHANGELOG.md` and `version.txt`.
 
 The release workflow packs the analyzer and publishes it to `nuget.org` after the release PR merges.

@@ -18,7 +18,7 @@ public sealed class UsersController : ControllerBase
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Users/Controllers/UsersController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Users/Controllers/UsersController.cs");
 
         diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0005EnforceAdminControllerShapeAnalyzer.DiagnosticId);
     }
@@ -28,12 +28,12 @@ public sealed class UsersController : ControllerBase
     {
         const string source = """
 [Route("api/admin/users")]
-public sealed class AdminUsersController : BaseAdminController
+public sealed class AdminUsersController : AdminControllerBase
 {
 }
 """;
 
-        var diagnostics = await GetDiagnosticsAsync(source, "apps/backend/Meridian.API/Features/Admin/Controllers/AdminUsersController.cs");
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Api/Features/Admin/Controllers/AdminUsersController.cs");
 
         diagnostics.Should().BeEmpty();
     }
@@ -43,7 +43,7 @@ public sealed class AdminUsersController : BaseAdminController
     {
         const string rootSource = """
 [Route("api/admin/platform")]
-public sealed partial class AdminPlatformController : BaseAdminController
+public sealed partial class AdminPlatformController : AdminControllerBase
 {
 }
 """;
@@ -59,8 +59,8 @@ public sealed partial class AdminPlatformController
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             new[]
             {
-                (Source: rootSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminPlatformController.cs"),
-                (Source: partialSource, Path: "apps/backend/Meridian.API/Features/Admin/Controllers/AdminPlatformController.Exports.cs")
+                (Source: rootSource, Path: "src/Api/Features/Admin/Controllers/AdminPlatformController.cs"),
+                (Source: partialSource, Path: "src/Api/Features/Admin/Controllers/AdminPlatformController.Exports.cs")
             },
             new MER0005EnforceAdminControllerShapeAnalyzer());
 

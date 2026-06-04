@@ -10,7 +10,7 @@ namespace Meridian.Analyzer;
 public sealed class MER0024AvoidStringExtensionsInQueryableAnalyzer : DiagnosticAnalyzer {
     public const string DiagnosticId = "MER0024";
 
-    private static readonly LocalizableString Title = "Avoid Meridian string extension guards inside IQueryable predicates";
+    private static readonly LocalizableString Title = "Avoid shared string extension guards inside IQueryable predicates";
     private static readonly LocalizableString MessageFormat = "Replace {0} with a query-translatable guard for IQueryable filters";
     private static readonly LocalizableString Description =
         "StringExtensions.IsNullOrEmpty/IsNullOrWhiteSpace are in-memory helpers. Using them inside IQueryable/Expression predicates risks non-translatable EF queries.";

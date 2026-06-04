@@ -11,10 +11,10 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
 {
     public const string DiagnosticId = "MER0005";
 
-    private static readonly LocalizableString Title = "Keep admin controllers on the admin controller contract";
-    private static readonly LocalizableString MessageFormat = "Admin controller surfaces must use the Admin*Controller name, api/admin route, and BaseAdminController inheritance contract";
+    private static readonly LocalizableString Title = "Keep a consistent admin controller shape";
+    private static readonly LocalizableString MessageFormat = "Admin controller surfaces must use the Admin*Controller name, api/admin route, and AdminControllerBase inheritance";
     private static readonly LocalizableString Description =
-        "Meridian admin routes are a separate blast-radius boundary. Controllers under the admin surface should be named Admin*Controller, inherit BaseAdminController, and expose api/admin routes.";
+        "Admin routes are a higher-risk surface. Controllers under the admin surface should be named Admin*Controller, inherit AdminControllerBase, and expose api/admin routes.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -114,7 +114,7 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
     private static bool HasAdminShape(IReadOnlyCollection<ClassDeclarationSyntax> declarations)
     {
         return declarations.Any(declaration => declaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal)) &&
-               declarations.Any(declaration => MeridianAnalyzerSyntaxHelpers.InheritsFrom(declaration, "BaseAdminController")) &&
+               declarations.Any(declaration => MeridianAnalyzerSyntaxHelpers.InheritsFrom(declaration, "AdminControllerBase")) &&
                declarations.Any(declaration => GetRouteTemplates(declaration).Any(route => route.StartsWith("api/admin", StringComparison.Ordinal)));
     }
 
