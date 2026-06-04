@@ -9,8 +9,6 @@
 
 ## Scope
 
-This repository is public.
-
 - Standalone package work should be reproducible from this repo with `dotnet test` and `dotnet pack`.
 - Consumer-specific rollout or severity policy belongs in the consuming project.
 

@@ -20,7 +20,7 @@ dotnet_diagnostic.MER0001.severity = warning
 dotnet_diagnostic.MER0002.severity = warning
 ```
 
-You can start with a small subset and widen later.
+Start with a small subset and widen later if the signal stays clean.
 
 ## Build Validation
 

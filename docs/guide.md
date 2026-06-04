@@ -2,7 +2,7 @@
 
 ## Package Contracts
 
-Keep these contracts stable unless you are executing an intentional analyzer review:
+These contracts should stay stable:
 
 - Analyzer IDs stay under the `MER` namespace.
 - Rule IDs should remain stable once published.
@@ -43,7 +43,7 @@ For `MER0002`, keep broader catch quality with Sonar/SDK analyzers and only own 
 
 ## Pilot Promotion Criteria
 
-Do not widen a pilot rule just because it exists.
+Do not widen a pilot rule just to widen it.
 
 Promote only when:
 

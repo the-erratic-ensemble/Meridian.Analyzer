@@ -55,7 +55,7 @@ Or add an explicit package reference:
 - Rule docs: [docs/rules/MER0024.md](docs/rules/MER0024.md)
 - Rule docs: [docs/rules/MER0025.md](docs/rules/MER0025.md)
 
-## Current Surface
+## Package Summary
 
 - Analyzer project: `src/Meridian.Analyzer/Meridian.Analyzer.csproj`
 - Test project: `tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj`
@@ -63,7 +63,7 @@ Or add an explicit package reference:
 - Category namespaces: `Meridian.Readability`, `Meridian.Security`, `Meridian.Architecture`, `Meridian.Reliability`, `Meridian.Performance`
 - Packaging status: published on `nuget.org`
 
-## Validation Entry Points
+## Maintainer Checks
 
 - Local test run: `dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release`
 - Local package smoke check: `dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts`
@@ -82,7 +82,7 @@ dotnet_diagnostic.MER0002.severity = warning
 
 You can enable only the rules you want. Each rule document describes the contract it enforces and the preferred refactor shape.
 
-## Risks And Current Boundaries
+## Notes
 
 - `nuget.org` is public. The current publish lane is fine for public distribution, but it is not a private feed.
 - Release automation depends on the `NUGET_KEY` GitHub secret. If that key rotates or loses push scope, the release workflow will fail at publish time.
@@ -96,12 +96,12 @@ You can enable only the rules you want. Each rule document describes the contrac
 | [Broad nested try/catch fallback flow](docs/rules/MER0002.md) | `MER0002` | Readability | Extract the inner fallback branch into a helper or flatten the exception-handling flow |
 | [Unsafe output-cache boundary](docs/rules/MER0003.md) | `MER0003` | Security | Remove `[OutputCache]` or replace it with no-store caching unless a persona-safe cache policy is reviewed |
 | [Controller authorization policy boundary](docs/rules/MER0004.md) | `MER0004` | Security | Declare class-level or action-level policies on admin and high-risk controllers |
-| [Admin controller shape contract](docs/rules/MER0005.md) | `MER0005` | Security | Align admin controllers on `Admin*Controller`, `api/admin`, and `BaseAdminController` |
+| [Admin controller shape contract](docs/rules/MER0005.md) | `MER0005` | Security | Align admin controllers on `Admin*Controller`, `api/admin`, and `AdminControllerBase` |
 | [Controller service locator boundary](docs/rules/MER0006.md) | `MER0006` | Architecture | Use constructor injection or `[FromServices]` instead of action-body service location |
 | [Raw configuration read boundary](docs/rules/MER0007.md) | `MER0007` | Reliability | Move raw reads to typed options, startup guards, or provider adapters |
 | [Startup bypass flag containment](docs/rules/MER0008.md) | `MER0008` | Security | Move `MERIDIAN_SKIP_*` reads behind `StartupGuards` or typed startup-skip options |
 | [Controller cancellation boundary](docs/rules/MER0009.md) | `MER0009` | Reliability | Add `CancellationToken` to async actions and avoid `CancellationToken.None` in request code |
-| [Clock and deterministic delay boundary](docs/rules/MER0010.md) | `MER0010` | Reliability | Use `IMeridianClock` or `TimeProvider` for runtime time or delay work |
+| [Clock and deterministic delay boundary](docs/rules/MER0010.md) | `MER0010` | Reliability | Use a clock abstraction or `TimeProvider` for runtime time or delay work |
 | [Static mutable runtime state](docs/rules/MER0011.md) | `MER0011` | Reliability | Move static mutable state from controllers or handlers into injectable bounded services |
 | [Health-check registration parity](docs/rules/MER0012.md) | `MER0012` | Reliability | Register every source `Microsoft.Extensions.Diagnostics.HealthChecks.IHealthCheck` through health-check registration |
 | [Backend layer-boundary guard](docs/rules/MER0013.md) | `MER0013` | Architecture | Move dependencies to the documented layer boundary |
