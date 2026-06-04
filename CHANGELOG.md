@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.5...v0.2.6) (2026-06-04)
+
+
+### Bug Fixes
+
+* update package dependencies ([973a3ae](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/973a3ae6c1a6be81291001480f96bfa3dd804bd6))
+
 ## [0.2.5](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.4...v0.2.5) (2026-06-04)
 
 
