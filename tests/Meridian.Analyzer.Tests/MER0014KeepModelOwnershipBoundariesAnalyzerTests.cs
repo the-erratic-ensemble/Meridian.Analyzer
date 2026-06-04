@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Xunit;
 
-namespace Meridian.Analyzers.Tests;
+namespace Meridian.Analyzer.Tests;
 
 public sealed class MER0014KeepModelOwnershipBoundariesAnalyzerTests
 {

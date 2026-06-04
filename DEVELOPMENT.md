@@ -6,7 +6,7 @@
 2. Restore dependencies:
 
 ```bash
-dotnet restore Meridian.Analyzers.slnx
+dotnet restore Meridian.Analyzer.slnx
 ```
 
 ## Normal Edit Loop
@@ -15,8 +15,8 @@ dotnet restore Meridian.Analyzers.slnx
 - Run the local checks that matter:
 
 ```bash
-dotnet test tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj -c Release
-dotnet pack Meridian.Analyzers.csproj -c Release -o artifacts
+dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
+dotnet pack Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
 - If you changed rule behavior, also run the Meridian consumer-side analyzer wrapper from the Meridian repo before you cut a release.
@@ -30,7 +30,7 @@ dotnet pack Meridian.Analyzers.csproj -c Release -o artifacts
 Meridian is expected to consume this repo through a sibling project reference at:
 
 ```text
-/home/matthias/projects/Meridian.Analyzers
+/home/matthias/projects/Meridian.Analyzer
 ```
 
 That keeps local analyzer development direct while package publishing stays a release concern.
@@ -42,7 +42,7 @@ That keeps local analyzer development direct while package publishing stays a re
 When you push conventional commits to `main`, `.github/workflows/release-please.yml` does two jobs:
 
 1. Opens or updates a Release Please PR with the next version and changelog changes.
-2. After that release PR is merged, packs `Meridian.Analyzers` and publishes it to `nuget.org`.
+2. After that release PR is merged, packs `Meridian.Analyzer` and publishes it to `nuget.org`.
 
 `nuget.org` is public. If you later need a private package flow, use a different feed.
 
@@ -53,5 +53,5 @@ The release workflow expects one GitHub repository secret:
 ## Installing The Published Package
 
 ```bash
-dotnet add package Meridian.Analyzers
+dotnet add package Meridian.Analyzer
 ```

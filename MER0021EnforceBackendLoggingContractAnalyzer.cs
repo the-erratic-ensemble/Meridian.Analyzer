@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAnalyzer
@@ -31,7 +31,7 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
         "/Telemetry/",
         "/Meridian.CLI/",
         "/Meridian.OpenApiExporter/",
-        "/Meridian.Analyzers/",
+        "/Meridian.Analyzer/",
         "/tools/",
         "/Tools/"
     };

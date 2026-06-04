@@ -1,4 +1,4 @@
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 internal static class MeridianDiagnosticCategories
 {

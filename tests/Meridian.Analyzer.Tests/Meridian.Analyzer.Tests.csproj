@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Meridian.Analyzers.csproj" />
+    <ProjectReference Include="../../Meridian.Analyzer.csproj" />
   </ItemGroup>
 
 </Project>

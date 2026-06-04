@@ -7,12 +7,12 @@
     <Company>the-erratic-ensemble</Company>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <PackageId>Meridian.Analyzers</PackageId>
-    <PackageProjectUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzers</PackageProjectUrl>
+    <PackageId>Meridian.Analyzer</PackageId>
+    <PackageProjectUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>roslyn;analyzers;csharp;dotnet;meridian</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzers</RepositoryUrl>
+    <RepositoryUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

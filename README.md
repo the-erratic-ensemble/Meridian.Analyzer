@@ -1,6 +1,6 @@
-# Meridian.Analyzers
+# Meridian.Analyzer
 
-`Meridian.Analyzers` is the canonical implementation surface for Meridian-owned backend Roslyn analyzers.
+`Meridian.Analyzer` is the canonical implementation surface for Meridian-owned backend Roslyn analyzers.
 
 ## Documentation
 
@@ -34,8 +34,8 @@
 
 ## Current Surface
 
-- Analyzer project: `Meridian.Analyzers.csproj`
-- Test project: `tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj`
+- Analyzer project: `Meridian.Analyzer.csproj`
+- Test project: `tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj`
 - Diagnostic prefix: `MER`
 - Category namespaces: `Meridian.Readability`, `Meridian.Security`, `Meridian.Architecture`, `Meridian.Reliability`, `Meridian.Performance`
 - Packaging status: packable analyzer package published through nuget.org after the release PR lands; Meridian can consume it locally through a sibling project reference during development
@@ -43,13 +43,13 @@
 
 ## Validation Entry Points
 
-- Local test run: `dotnet test tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj -c Release`
-- Local package smoke check: `dotnet pack Meridian.Analyzers.csproj -c Release -o artifacts`
+- Local test run: `dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release`
+- Local package smoke check: `dotnet pack Meridian.Analyzer.csproj -c Release -o artifacts`
 - Meridian consumer validation: `rtk pnpm backend:analyzers:validate`
 
 Use `dotnet test` and `dotnet pack` from this repo to validate the standalone package itself.
 Use `backend:analyzers:validate` and `backend:analyzers:inventory` from the Meridian repo when you need consumer-side rollout or inventory evidence.
-Use `backend:analyzers:validate:build` against a consumer project to prove analyzer loading during build. Building `Meridian.Analyzers.csproj` itself is compile validation only, because the analyzer project intentionally does not consume itself.
+Use `backend:analyzers:validate:build` against a consumer project to prove analyzer loading during build. Building `Meridian.Analyzer.csproj` itself is compile validation only, because the analyzer project intentionally does not consume itself.
 In Meridian, normal backend builds keep analyzers disabled through `apps/backend/Directory.Build.props`; warning-enabled Meridian rules surface during live analysis and explicit analyzer-enabled lanes such as `backend:analyzers:validate`, `backend:analyzers:inventory`, or `backend:analyzers:validate:build`.
 Use `--diagnostics` to scope runs to specific Meridian rules; default diagnostics are `MER0001,MER0002`.
 
@@ -135,8 +135,8 @@ The current replayable `MER0002` inventory surfaces `1` candidate in `Meridian.A
 Before landing `MER0002+` or any later rule, update these four surfaces in the same change:
 
 1. Analyzer + tests:
-   - add the analyzer implementation at the repo root beside `Meridian.Analyzers.csproj`
-   - add positive and negative tests under `tests/Meridian.Analyzers.Tests/`
+   - add the analyzer implementation at the repo root beside `Meridian.Analyzer.csproj`
+   - add positive and negative tests under `tests/Meridian.Analyzer.Tests/`
    - this is allowed by `docs/reference/2026-05/2026-05-07-agent-test-creation-policy.md` because analyzer tests are the rule contract, not speculative product-behavior tests
 2. Operator rollout:
    - update `apps/backend/.editorconfig` in the Meridian repo

@@ -40,15 +40,15 @@ jobs:
 
       - name: Restore
         if: ${{ steps.release.outputs.release_created }}
-        run: dotnet restore Meridian.Analyzers.slnx
+        run: dotnet restore Meridian.Analyzer.slnx
 
       - name: Test
         if: ${{ steps.release.outputs.release_created }}
-        run: dotnet test tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj -c Release --no-restore
+        run: dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release --no-restore
 
       - name: Pack
         if: ${{ steps.release.outputs.release_created }}
-        run: dotnet pack Meridian.Analyzers.csproj -c Release --no-restore -o artifacts
+        run: dotnet pack Meridian.Analyzer.csproj -c Release --no-restore -o artifacts
 
       - name: Publish package
         if: ${{ steps.release.outputs.release_created }}

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MER0015PreferMeridianStringHelpersAnalyzer : DiagnosticAnalyzer

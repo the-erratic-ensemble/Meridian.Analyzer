@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Meridian.Analyzers.Tests;
+namespace Meridian.Analyzer.Tests;
 
 internal static class AnalyzerTestHost
 {
@@ -12,7 +12,7 @@ internal static class AnalyzerTestHost
         string source,
         DiagnosticAnalyzer analyzer,
         string path = "Test0.cs",
-        string assemblyName = "Meridian.Analyzers.Tests.Generated")
+        string assemblyName = "Meridian.Analyzer.Tests.Generated")
     {
         return await GetDiagnosticsAsync(
             new[] { (Source: source, Path: path) },
@@ -23,7 +23,7 @@ internal static class AnalyzerTestHost
     internal static async Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(
         IReadOnlyCollection<(string Source, string Path)> sources,
         DiagnosticAnalyzer analyzer,
-        string assemblyName = "Meridian.Analyzers.Tests.Generated")
+        string assemblyName = "Meridian.Analyzer.Tests.Generated")
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var syntaxTrees = sources

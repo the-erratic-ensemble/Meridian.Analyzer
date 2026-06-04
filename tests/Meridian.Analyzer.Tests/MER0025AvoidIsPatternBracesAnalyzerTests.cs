@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace Meridian.Analyzers.Tests;
+namespace Meridian.Analyzer.Tests;
 
 public sealed class MER0025AvoidIsPatternBracesAnalyzerTests
 {
@@ -232,7 +232,7 @@ public sealed class PatternWalker
         var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
             source,
             new MER0025AvoidIsPatternBracesAnalyzer(),
-            "apps/backend/Meridian.Analyzers/PatternWalker.cs");
+            "apps/backend/Meridian.Analyzer/PatternWalker.cs");
 
         diagnostics.Should().BeEmpty();
     }

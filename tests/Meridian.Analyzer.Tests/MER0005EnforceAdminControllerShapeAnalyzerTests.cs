@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace Meridian.Analyzers.Tests;
+namespace Meridian.Analyzer.Tests;
 
 public sealed class MER0005EnforceAdminControllerShapeAnalyzerTests
 {

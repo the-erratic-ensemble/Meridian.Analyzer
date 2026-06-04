@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
-using Meridian.Analyzers;
+using Meridian.Analyzer;
 using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Xunit;
 
-namespace Meridian.Analyzers.Tests;
+namespace Meridian.Analyzer.Tests;
 
 public sealed class MER0001DoNotUseConditionalExpressionsInInitializersAnalyzerTests
 {

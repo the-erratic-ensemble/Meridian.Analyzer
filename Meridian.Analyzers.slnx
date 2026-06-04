@@ -1,6 +1,0 @@
-<Solution>
-  <Folder Name="/tests/">
-    <Project Path="tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj" />
-  </Folder>
-  <Project Path="Meridian.Analyzers.csproj" />
-</Solution>

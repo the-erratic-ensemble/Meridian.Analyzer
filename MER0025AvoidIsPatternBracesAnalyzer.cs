@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
@@ -19,7 +19,7 @@ public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
 
     private static readonly string[] ExcludedPathSegments =
     {
-        "/Meridian.Analyzers/"
+        "/Meridian.Analyzer/"
     };
 
     internal static readonly DiagnosticDescriptor Rule = new(

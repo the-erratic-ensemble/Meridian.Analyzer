@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnalyzer

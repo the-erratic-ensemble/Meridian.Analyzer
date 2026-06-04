@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Meridian.Analyzers;
+namespace Meridian.Analyzer;
 
 internal static class MeridianAnalyzerSyntaxHelpers
 {
