@@ -6,7 +6,7 @@
 2. Restore dependencies:
 
 ```bash
-dotnet restore Meridian.Analyzers.sln
+dotnet restore Meridian.Analyzers.slnx
 ```
 
 ## Normal Edit Loop
@@ -42,25 +42,16 @@ That keeps local analyzer development direct while package publishing stays a re
 When you push conventional commits to `main`, `.github/workflows/release-please.yml` does two jobs:
 
 1. Opens or updates a Release Please PR with the next version and changelog changes.
-2. After that release PR is merged, packs `Meridian.Analyzers` and publishes it to the GitHub Packages NuGet feed for `the-erratic-ensemble`.
+2. After that release PR is merged, packs `Meridian.Analyzers` and publishes it to `nuget.org`.
 
-`nuget.org` is public, so the private-package path for this repo is GitHub Packages:
+`nuget.org` is public. If you later need a private package flow, use a different feed.
 
-```text
-https://nuget.pkg.github.com/the-erratic-ensemble/index.json
-```
+The release workflow expects one GitHub repository secret:
 
-## Installing The Private Package
+- `NUGET_KEY`: nuget.org push key with `Push` scope for this package ID.
 
-Use a classic GitHub personal access token with package read access and add the GitHub Packages source:
+## Installing The Published Package
 
 ```bash
-dotnet nuget add source \
-  --username YOUR_GITHUB_USERNAME \
-  --password YOUR_GITHUB_PAT \
-  --store-password-in-clear-text \
-  --name github-meridian \
-  "https://nuget.pkg.github.com/the-erratic-ensemble/index.json"
+dotnet add package Meridian.Analyzers
 ```
-
-To avoid routing public dependencies through GitHub Packages, use NuGet package source mapping when Meridian switches to package consumption.

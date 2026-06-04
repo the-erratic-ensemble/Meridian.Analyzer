@@ -38,7 +38,7 @@
 - Test project: `tests/Meridian.Analyzers.Tests/Meridian.Analyzers.Tests.csproj`
 - Diagnostic prefix: `MER`
 - Category namespaces: `Meridian.Readability`, `Meridian.Security`, `Meridian.Architecture`, `Meridian.Reliability`, `Meridian.Performance`
-- Packaging status: packable analyzer package published through GitHub Packages; Meridian can consume it locally through a sibling project reference during development
+- Packaging status: packable analyzer package published through nuget.org after the release PR lands; Meridian can consume it locally through a sibling project reference during development
 - Current rollout: `MER0001` stays wrapper-scoped to `apps/backend/Meridian.API/Features/Dev/Controllers/DevController.Diagnostics.cs`; `MER0002` stays wrapper-default for explicit format and inventory lanes; `MER0003`, `MER0004`, `MER0005`, `MER0006`, `MER0012`, and `MER0021` are `warning` in `apps/backend/.editorconfig` for analyzer-scope backend projects during live analysis and explicit analyzer-enabled lanes; `MER0007`, `MER0008`, `MER0009`, `MER0010`, `MER0011`, `MER0013` through `MER0020`, and `MER0022` through `MER0025` remain inventory-driven unless explicitly scoped by wrapper input
 
 ## Validation Entry Points
