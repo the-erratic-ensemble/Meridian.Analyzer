@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.2...v0.2.3) (2026-06-04)
+
+
+### Bug Fixes
+
+* remove internal documentation coupling ([5947006](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/5947006d16a9efbcc5c69e77e49ea45c678ffc08))
+
 ## [0.2.2](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.1...v0.2.2) (2026-06-04)
 
 
