@@ -19,7 +19,7 @@ dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Rele
 dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
-- If you changed rule behavior, also run the Meridian consumer-side analyzer wrapper from the Meridian repo before you cut a release.
+- If you changed rule behavior, also run the Meridian consumer-side analyzer wrapper before you cut a release when Meridian rollout behavior is part of the change.
 - Commit with Conventional Commits. `release-please` uses commit prefixes for version bumps:
   - `fix:` -> patch
   - `feat:` -> minor
@@ -55,6 +55,10 @@ The release workflow expects one GitHub repository secret:
 ```bash
 dotnet add package Meridian.Analyzer
 ```
+
+External consumers can stop there.
+
+The Meridian-specific wrapper commands in this repo exist for the internal rollout contract that originally produced these analyzers. They are not required to consume the published NuGet package.
 
 ## Current Risks
 

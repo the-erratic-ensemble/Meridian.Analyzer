@@ -2,6 +2,16 @@
 
 Use these commands when validating Meridian-owned backend analyzers.
 
+## Package Consumption
+
+Generic consumer setup is standard NuGet usage:
+
+```bash
+dotnet add package Meridian.Analyzer
+```
+
+The rest of this document is Meridian-specific and focuses on the wrapper commands used to inventory and stage rules in the Meridian backend.
+
 ## Entry Points
 
 - Root package command: `rtk pnpm backend:analyzers:validate`

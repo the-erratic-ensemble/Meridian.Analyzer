@@ -7,6 +7,13 @@
 - `docs/`: maintainer guidance, usage notes, and rule docs
 - root files: release workflow, package metadata, versioning, and contributor-facing docs
 
+## Scope
+
+This repository is public.
+
+- Standalone package work should be reproducible from this repo with `dotnet test` and `dotnet pack`.
+- Meridian-specific rollout checks are optional unless you are also changing how the analyzers are consumed inside the Meridian monorepo.
+
 ## Local Edit Loop
 
 1. Restore:
@@ -22,7 +29,7 @@ dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Rele
 dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
-3. If rule behavior changed, also run the Meridian consumer-side check from the Meridian repo:
+3. If rule behavior changed and you also need Meridian rollout confidence, run the Meridian consumer-side check from the Meridian repo:
 
 ```bash
 rtk pnpm backend:analyzers:validate:build -- --project apps/backend/Meridian.Shared/Meridian.Shared.csproj --diagnostics MER0001

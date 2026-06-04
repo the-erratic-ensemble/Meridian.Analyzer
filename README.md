@@ -2,6 +2,24 @@
 
 `Meridian.Analyzer` is the canonical implementation surface for Meridian-owned backend Roslyn analyzers.
 
+## Quick Start
+
+Install the published analyzer package into a consumer project:
+
+```bash
+dotnet add package Meridian.Analyzer
+```
+
+Or add an explicit package reference:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Meridian.Analyzer" Version="0.2.*" PrivateAssets="all" />
+</ItemGroup>
+```
+
+This repository is public. Some rollout notes and validation examples below are Meridian-specific because the analyzers were built for the Meridian backend and are exercised there first.
+
 ## Repository Layout
 
 - `src/Meridian.Analyzer/`: analyzer project, rule implementations, helpers, and Roslyn release tracking files
@@ -55,7 +73,7 @@
 - Meridian consumer validation: `rtk pnpm backend:analyzers:validate`
 
 Use `dotnet test` and `dotnet pack` from this repo to validate the standalone package itself.
-Use `backend:analyzers:validate` and `backend:analyzers:inventory` from the Meridian repo when you need consumer-side rollout or inventory evidence.
+Use `backend:analyzers:validate` and `backend:analyzers:inventory` from the Meridian repo only when you need Meridian consumer-side rollout or inventory evidence.
 Use `backend:analyzers:validate:build` against a consumer project to prove analyzer loading during build. Building `src/Meridian.Analyzer/Meridian.Analyzer.csproj` itself is compile validation only, because the analyzer project intentionally does not consume itself.
 
 ## Risks And Current Boundaries

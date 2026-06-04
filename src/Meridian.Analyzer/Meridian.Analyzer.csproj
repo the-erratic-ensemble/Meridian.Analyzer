@@ -11,8 +11,9 @@
     <PackageId>Meridian.Analyzer</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</PackageProjectUrl>
+    <PackageReleaseNotes>See CHANGELOG.md and GitHub releases for rule and rollout updates.</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>roslyn;analyzers;csharp;dotnet;meridian</PackageTags>
+    <PackageTags>roslyn;roslyn-analyzer;analyzers;csharp;dotnet;static-analysis;code-quality;meridian</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</RepositoryUrl>
   </PropertyGroup>
