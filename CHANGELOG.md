@@ -19,7 +19,3 @@
 
 * clean analyzer packaging warnings ([d6bf2da](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/d6bf2da4800dc4f66ab9439797c1a2fe312bda35))
 * publish releases to nuget ([c02c2b8](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/c02c2b8417831e1cf2a73f4b4f29fc0b047fe30f))
-
-## Changelog
-
-All notable changes to this project will be documented in this file.

@@ -2,6 +2,13 @@
 
 `Meridian.Analyzer` is the canonical implementation surface for Meridian-owned backend Roslyn analyzers.
 
+## Repository Layout
+
+- `src/Meridian.Analyzer/`: analyzer project, rule implementations, helpers, and Roslyn release tracking files
+- `tests/Meridian.Analyzer.Tests/`: analyzer behavior tests
+- `docs/`: maintainer guidance, examples, and per-rule documentation
+- `LICENSE`: MIT license for the repository and published package metadata
+
 ## Documentation
 
 - Usage examples: [docs/usage-example.md](docs/usage-example.md)
@@ -34,7 +41,7 @@
 
 ## Current Surface
 
-- Analyzer project: `Meridian.Analyzer.csproj`
+- Analyzer project: `src/Meridian.Analyzer/Meridian.Analyzer.csproj`
 - Test project: `tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj`
 - Diagnostic prefix: `MER`
 - Category namespaces: `Meridian.Readability`, `Meridian.Security`, `Meridian.Architecture`, `Meridian.Reliability`, `Meridian.Performance`
@@ -44,12 +51,18 @@
 ## Validation Entry Points
 
 - Local test run: `dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release`
-- Local package smoke check: `dotnet pack Meridian.Analyzer.csproj -c Release -o artifacts`
+- Local package smoke check: `dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts`
 - Meridian consumer validation: `rtk pnpm backend:analyzers:validate`
 
 Use `dotnet test` and `dotnet pack` from this repo to validate the standalone package itself.
 Use `backend:analyzers:validate` and `backend:analyzers:inventory` from the Meridian repo when you need consumer-side rollout or inventory evidence.
-Use `backend:analyzers:validate:build` against a consumer project to prove analyzer loading during build. Building `Meridian.Analyzer.csproj` itself is compile validation only, because the analyzer project intentionally does not consume itself.
+Use `backend:analyzers:validate:build` against a consumer project to prove analyzer loading during build. Building `src/Meridian.Analyzer/Meridian.Analyzer.csproj` itself is compile validation only, because the analyzer project intentionally does not consume itself.
+
+## Risks And Current Boundaries
+
+- `nuget.org` is public. The current publish lane is fine for public distribution, but it is not a private feed.
+- Release automation depends on the `NUGET_KEY` GitHub secret. If that key rotates or loses push scope, the release workflow will fail at publish time.
+- Rule rollout still depends on the Meridian monorepo’s `.editorconfig` and analyzer wrapper scripts. This repo owns implementation and package release, not the operational rollout contract by itself.
 In Meridian, normal backend builds keep analyzers disabled through `apps/backend/Directory.Build.props`; warning-enabled Meridian rules surface during live analysis and explicit analyzer-enabled lanes such as `backend:analyzers:validate`, `backend:analyzers:inventory`, or `backend:analyzers:validate:build`.
 Use `--diagnostics` to scope runs to specific Meridian rules; default diagnostics are `MER0001,MER0002`.
 
@@ -135,7 +148,7 @@ The current replayable `MER0002` inventory surfaces `1` candidate in `Meridian.A
 Before landing `MER0002+` or any later rule, update these four surfaces in the same change:
 
 1. Analyzer + tests:
-   - add the analyzer implementation at the repo root beside `Meridian.Analyzer.csproj`
+   - add the analyzer implementation under `src/Meridian.Analyzer/`
    - add positive and negative tests under `tests/Meridian.Analyzer.Tests/`
    - this is allowed by `docs/reference/2026-05/2026-05-07-agent-test-creation-policy.md` because analyzer tests are the rule contract, not speculative product-behavior tests
 2. Operator rollout:

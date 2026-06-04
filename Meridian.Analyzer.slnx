@@ -2,5 +2,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj" />
   </Folder>
-  <Project Path="Meridian.Analyzer.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Meridian.Analyzer/Meridian.Analyzer.csproj" />
+  </Folder>
 </Solution>

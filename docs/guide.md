@@ -9,7 +9,7 @@ Keep these contracts stable unless you are executing an intentional analyzer rev
 - `MER0002` is the current wrapper-default contract for broad nested try/catch fallback flow inside another try block.
 - `MER0003`, `MER0004`, `MER0006`, `MER0008`, and `MER0013` are the first staged contracts from the 2026-05-07 backend analyzer candidate audit. `MER0003` and `MER0004` are currently warning-enabled in committed `.editorconfig`; `MER0008` and `MER0013` stay inventory-driven.
 - `MER0005`, `MER0007`, and `MER0009` through `MER0025` are remaining-candidate contracts from the same audit. `MER0005`, `MER0006`, `MER0012`, and `MER0021` are currently warning-enabled in committed `.editorconfig`; most of the rest remain inventory-driven because they depend on path/naming heuristics or current-code queue classification.
-- `Meridian.Analyzer.csproj` is the canonical implementation surface.
+- `src/Meridian.Analyzer/Meridian.Analyzer.csproj` is the canonical implementation surface.
 - `tests/Meridian.Analyzer.Tests/` is the canonical behavior test surface.
 - `apps/backend/.editorconfig` in the Meridian repo is the operator severity surface.
 - `docs` is the canonical documentation surface.
@@ -28,7 +28,7 @@ Keep these contracts stable unless you are executing an intentional analyzer rev
 
 When adding the second or later rule, treat these updates as mandatory in the same patch:
 
-- implementation file at the repo root beside `Meridian.Analyzer.csproj`
+- implementation file under `src/Meridian.Analyzer/`
 - behavior tests in `tests/Meridian.Analyzer.Tests/`
 - severity/rollout entry in `apps/backend/.editorconfig`
 - rule doc in `docs/rules/`
@@ -97,7 +97,7 @@ Run these before handoff:
 ```bash
 dotnet restore Meridian.Analyzer.slnx
 dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
-dotnet pack Meridian.Analyzer.csproj -c Release -o artifacts
+dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
 From the Meridian repo, run the consumer-side checks that match the rollout work:
@@ -108,7 +108,7 @@ rtk pnpm backend:analyzers:inventory -- --report-dir output/analyzers/backend-cu
 rtk pnpm backend:analyzers:validate:build -- --project apps/backend/Meridian.Shared/Meridian.Shared.csproj
 ```
 
-Run `backend:analyzers:validate:build` against a consumer project. A direct `Meridian.Analyzer.csproj` build is compile validation only because the analyzer project is excluded from consuming itself.
+Run `backend:analyzers:validate:build` against a consumer project. A direct `src/Meridian.Analyzer/Meridian.Analyzer.csproj` build is compile validation only because the analyzer project is excluded from consuming itself.
 
 To run only Meridian custom analyzer diagnostics, pass `--diagnostics` explicitly (defaults are `MER0001,MER0002`):
 

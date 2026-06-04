@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>Meridian.Analyzer</Title>
     <Description>Meridian-owned Roslyn analyzers for backend readability, architecture, security, reliability, and performance contracts.</Description>
     <Authors>the-erratic-ensemble</Authors>
     <Company>the-erratic-ensemble</Company>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Meridian.Analyzer</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>roslyn;analyzers;csharp;dotnet;meridian</PackageTags>
@@ -20,9 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="tests/**/*.cs" />
     <None Include="_._" Pack="true" PackagePath="lib/netstandard2.0" Visible="false" />
-    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="\" />
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(OutputPath)$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
   </ItemGroup>

@@ -16,7 +16,7 @@ dotnet restore Meridian.Analyzer.slnx
 
 ```bash
 dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
-dotnet pack Meridian.Analyzer.csproj -c Release -o artifacts
+dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
 - If you changed rule behavior, also run the Meridian consumer-side analyzer wrapper from the Meridian repo before you cut a release.
@@ -55,3 +55,9 @@ The release workflow expects one GitHub repository secret:
 ```bash
 dotnet add package Meridian.Analyzer
 ```
+
+## Current Risks
+
+- `nuget.org` publication is public by default.
+- Meridian rollout behavior still depends on the Meridian repo’s analyzer wrapper and `.editorconfig`.
+- If you rename the package ID or GitHub repo again later, update `README.md`, `version.txt`, the workflow files, and the Meridian sibling-project reference in one change.
