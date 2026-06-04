@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.3...v0.2.4) (2026-06-04)
+
+
+### Bug Fixes
+
+* tighten public documentation wording ([14b2350](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/14b2350c860fd1876563887df5894863114f3aa3))
+
 ## [0.2.3](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.2...v0.2.3) (2026-06-04)
 
 
