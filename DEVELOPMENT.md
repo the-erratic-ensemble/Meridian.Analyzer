@@ -19,21 +19,10 @@ dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Rele
 dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
-- If you changed rule behavior, also run the Meridian consumer-side analyzer wrapper before you cut a release when Meridian rollout behavior is part of the change.
 - Commit with Conventional Commits. `release-please` uses commit prefixes for version bumps:
   - `fix:` -> patch
   - `feat:` -> minor
   - `feat!:` or `fix!:` -> major
-
-## Meridian Local Development Contract
-
-Meridian is expected to consume this repo through a sibling project reference at:
-
-```text
-/home/matthias/projects/Meridian.Analyzer
-```
-
-That keeps local analyzer development direct while package publishing stays a release concern.
 
 ## Release Flow
 
@@ -56,12 +45,9 @@ The release workflow expects one GitHub repository secret:
 dotnet add package Meridian.Analyzer
 ```
 
-External consumers can stop there.
-
-The Meridian-specific wrapper commands in this repo exist for the internal rollout contract that originally produced these analyzers. They are not required to consume the published NuGet package.
+Configure severities in the consuming project's `.editorconfig` or equivalent analyzer settings.
 
 ## Current Risks
 
 - `nuget.org` publication is public by default.
-- Meridian rollout behavior still depends on the Meridian repo’s analyzer wrapper and `.editorconfig`.
-- If you rename the package ID or GitHub repo again later, update `README.md`, `version.txt`, the workflow files, and the Meridian sibling-project reference in one change.
+- If you rename the package ID or GitHub repo again later, update `README.md`, `version.txt`, and the workflow files in one change.

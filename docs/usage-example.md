@@ -1,74 +1,50 @@
 # Usage Example
 
-Use these commands when validating Meridian-owned backend analyzers.
+Use these examples when consuming `Meridian.Analyzer`.
 
-## Package Consumption
+## Install The Package
 
-Generic consumer setup is standard NuGet usage:
+Add the package to a project:
 
 ```bash
 dotnet add package Meridian.Analyzer
 ```
 
-The rest of this document is Meridian-specific and focuses on the wrapper commands used to inventory and stage rules in the Meridian backend.
+## Configure Severity
 
-## Entry Points
+Enable rules in `.editorconfig`:
 
-- Root package command: `rtk pnpm backend:analyzers:validate`
-- Root package inventory command: `rtk pnpm backend:analyzers:inventory`
-- Root package fallback command: `rtk pnpm backend:analyzers:validate:build`
-- Direct wrapper: `rtk proxy python3 scripts/tooling/run-backend-analyzers.py`
-
-## Default Pilot Validation
-
-```bash
-rtk pnpm backend:analyzers:validate
+```ini
+[*.cs]
+dotnet_diagnostic.MER0001.severity = warning
+dotnet_diagnostic.MER0002.severity = warning
 ```
 
-This validates the currently enabled pilot scope.
+You can start with a small subset and widen later.
 
-The wrapper default diagnostics now cover the current Meridian rule set: `MER0001` and `MER0002`.
+## Build Validation
 
-## Narrow The Pilot Scope
-
-```bash
-rtk pnpm backend:analyzers:validate -- --include apps/backend/Meridian.API/Features/Dev/Controllers/DevController.Diagnostics.cs
-```
-
-`--include` only narrows within already-enabled scope. It does not override disabled severities.
-
-## Run A Broader Inventory
+Run a normal build on the consuming project:
 
 ```bash
-rtk pnpm backend:analyzers:inventory
+dotnet build
 ```
 
-Inventory mode temporarily writes a project-local `.editorconfig` override, scans the target project, writes a JSON report, and restores project state before exiting.
+Analyzer diagnostics will surface according to the severities configured by the consumer.
 
-## Inventory One File Outside The Pilot
+## Direct Package Reference
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Meridian.Analyzer" Version="0.2.*" PrivateAssets="all" />
+</ItemGroup>
+```
+
+## Local Maintainer Checks
+
+When editing this repository itself:
 
 ```bash
-rtk pnpm backend:analyzers:inventory -- --include apps/backend/Meridian.API/Features/Council/Controllers/CouncilIntelligenceController.Helpers.cs
+dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
+dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
-
-## Inventory A Specific MER0002 Candidate
-
-```bash
-rtk pnpm backend:analyzers:inventory -- --diagnostics MER0002 --project apps/backend/Meridian.Analytics/Meridian.Analytics.csproj --include apps/backend/Meridian.Analytics/Services/ClickHouseAnalyticsService.cs
-```
-
-## Build Fallback
-
-```bash
-rtk pnpm backend:analyzers:validate:build
-```
-
-Use this when you need to prove analyzer loading or compare the pilot against another analyzer-scope project.
-
-## Example Report Output
-
-Inventory runs write a JSON report such as:
-
-`docs/analysis/2026-04/backend-custom-analyzers-meridian-api-inventory-report/format-report.json`
-
-The wrapper parses that report and fails when matching diagnostics are present, even when no code fix exists.

@@ -17,7 +17,7 @@ MER0009 | Meridian.Reliability | Warning | Expose cancellation at async controll
 MER0010 | Meridian.Reliability | Warning | Use Meridian clock or TimeProvider boundaries instead of direct system time, raw Task.Delay, or raw timers.
 MER0011 | Meridian.Reliability | Warning | Avoid static mutable state in controllers and auth/session handlers.
 MER0012 | Meridian.Reliability | Warning | Register source IHealthCheck implementations through health-check registration.
-MER0013 | Meridian.Architecture | Warning | Respect documented Meridian backend layer boundaries.
+MER0013 | Meridian.Architecture | Warning | Respect documented backend layer boundaries.
 MER0014 | Meridian.Architecture | Info | Keep backend model, DTO, and entity ownership boundaries reviewable.
 MER0015 | Meridian.Readability | Warning | Prefer Meridian.Shared string helpers for in-memory string normalization.
 MER0016 | Meridian.Architecture | Warning | Use shared Meridian JSON profiles instead of ad hoc JSON option construction.

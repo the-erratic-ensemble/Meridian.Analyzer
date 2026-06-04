@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Title>Meridian.Analyzer</Title>
-    <Description>Meridian-owned Roslyn analyzers for backend readability, architecture, security, reliability, and performance contracts.</Description>
+    <Description>Roslyn analyzers for backend readability, architecture, security, reliability, and performance contracts.</Description>
     <Authors>the-erratic-ensemble</Authors>
     <Company>the-erratic-ensemble</Company>
     <IsPackable>true</IsPackable>
@@ -11,7 +11,7 @@
     <PackageId>Meridian.Analyzer</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</PackageProjectUrl>
-    <PackageReleaseNotes>See CHANGELOG.md and GitHub releases for rule and rollout updates.</PackageReleaseNotes>
+    <PackageReleaseNotes>See CHANGELOG.md and GitHub releases for package and rule updates.</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>roslyn;roslyn-analyzer;analyzers;csharp;dotnet;static-analysis;code-quality;meridian</PackageTags>
     <RepositoryType>git</RepositoryType>

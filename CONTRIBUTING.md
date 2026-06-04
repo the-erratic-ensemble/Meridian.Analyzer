@@ -12,7 +12,7 @@
 This repository is public.
 
 - Standalone package work should be reproducible from this repo with `dotnet test` and `dotnet pack`.
-- Meridian-specific rollout checks are optional unless you are also changing how the analyzers are consumed inside the Meridian monorepo.
+- Consumer-specific rollout or severity policy belongs in the consuming project.
 
 ## Local Edit Loop
 
@@ -29,20 +29,13 @@ dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Rele
 dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
 ```
 
-3. If rule behavior changed and you also need Meridian rollout confidence, run the Meridian consumer-side check from the Meridian repo:
-
-```bash
-rtk pnpm backend:analyzers:validate:build -- --project apps/backend/Meridian.Shared/Meridian.Shared.csproj --diagnostics MER0001
-```
-
 ## Rule Changes
 
 When you add or materially change a rule:
 
 - update tests in `tests/Meridian.Analyzer.Tests/`
 - update the matching rule doc under `docs/rules/`
-- update the rule table and rollout notes in `README.md`
-- update the committed rollout surface in the Meridian repo when the operational contract changed
+- update the rule table in `README.md`
 
 ## Releases
 
