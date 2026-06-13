@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.6...v0.3.0) (2026-06-13)
+
+
+### Features
+
+* add readability analyzers for query and decision-tree complexity ([#15](https://github.com/the-erratic-ensemble/Meridian.Analyzer/issues/15)) ([1c50a77](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/1c50a7752c47afb60016c21dd63ea92d856f16b5))
+
 ## [0.2.6](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.5...v0.2.6) (2026-06-04)
 
 
