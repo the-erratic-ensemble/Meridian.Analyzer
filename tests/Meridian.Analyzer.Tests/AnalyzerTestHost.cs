@@ -47,6 +47,7 @@ internal static class AnalyzerTestHost
         {
             typeof(object).Assembly,
             typeof(Enumerable).Assembly,
+            typeof(Queryable).Assembly,
             typeof(System.Linq.Expressions.Expression).Assembly,
             typeof(Task).Assembly,
             typeof(System.Runtime.GCSettings).Assembly,

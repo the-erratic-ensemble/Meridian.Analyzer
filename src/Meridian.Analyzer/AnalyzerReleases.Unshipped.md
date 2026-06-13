@@ -30,3 +30,7 @@ MER0022 | Meridian.Performance | Warning | Route Redis keyspace scans through a 
 MER0023 | Meridian.Reliability | Warning | Own detached runtime tasks with explicit lifetime, cancellation, and observability.
 MER0024 | Meridian.Reliability | Warning | Avoid shared string extension guards inside IQueryable and expression predicates.
 MER0025 | Meridian.Readability | Warning | Avoid empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })`.
+MER0026 | Meridian.Readability | Warning | Avoid deeply nested ternary chains by extracting named classification steps.
+MER0027 | Meridian.Readability | Warning | Extract named predicates from overly long boolean `&&` and `||` chains.
+MER0028 | Meridian.Readability | Warning | Move heavy multi-line initializer-member expressions into named locals or helpers.
+MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with seven or more chained query calls.
