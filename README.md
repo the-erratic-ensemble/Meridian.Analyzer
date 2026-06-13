@@ -92,6 +92,10 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Detached runtime tasks](docs/rules/MER0023.md) | `MER0023` | Reliability | Give background work an explicit lifetime, cancellation path, and observable failure path |
 | [Queryable string-extension predicates](docs/rules/MER0024.md) | `MER0024` | Reliability | Replace `StringExtensions.IsNullOr*` inside queryable or expression-returning methods with translatable query guards |
 | [Empty is-pattern braces](docs/rules/MER0025.md) | `MER0025` | Readability | Replace empty property-pattern braces with shared nullable helpers or explicit null checks when behavior matches |
+| [Nested ternary chains](docs/rules/MER0026.md) | `MER0026` | Readability | Extract long ternary decision trees into named steps |
+| [Long boolean chains](docs/rules/MER0027.md) | `MER0027` | Readability | Split long `&&` and `||` chains into named predicates |
+| [Heavy initializer expressions](docs/rules/MER0028.md) | `MER0028` | Readability | Stage large multi-line initializer member expressions before object construction |
+| [Long LINQ and EF chains](docs/rules/MER0029.md) | `MER0029` | Readability | Break long fluent query chains into named intermediate steps |
 
 ## Rule-Addition Checklist
 
