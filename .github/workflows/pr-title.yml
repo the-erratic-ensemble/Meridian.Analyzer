@@ -1,0 +1,37 @@
+name: pr-title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?(!)?: .+'
+
+          if [[ "$PR_TITLE" =~ $pattern ]]; then
+            exit 0
+          fi
+
+          echo "Pull request titles must use Conventional Commits."
+          echo "This keeps squash merges parseable by release-please."
+          echo
+          echo "Accepted examples:"
+          echo "  feat: add analyzer rule"
+          echo "  fix(analyzer): allow CLI output"
+          echo "  chore(main): release 0.4.0"
+          exit 1
