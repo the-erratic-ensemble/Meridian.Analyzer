@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.3.0...v0.4.0) (2026-06-14)
+
+
+### Features
+
+* add MER0030 and MER0031 readability analyzers ([b0865f2](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/b0865f25c4a09c03eb1446d6001fbe9b379e84f4))
+
+
+### Bug Fixes
+
+* allow Meridian.CLI console output in MER0021 ([b0865f2](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/b0865f25c4a09c03eb1446d6001fbe9b379e84f4))
+
 ## [0.3.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.2.6...v0.3.0) (2026-06-13)
 
 
