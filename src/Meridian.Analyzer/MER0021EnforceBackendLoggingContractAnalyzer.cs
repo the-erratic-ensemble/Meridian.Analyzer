@@ -30,6 +30,7 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
         "/Startup/",
         "/Telemetry/",
         "/Cli/",
+        "/Meridian.CLI/",
         "/OpenApiExporter/",
         "/Meridian.Analyzer/",
         "/tools/",

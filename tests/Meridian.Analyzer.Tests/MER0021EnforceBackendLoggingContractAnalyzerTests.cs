@@ -57,6 +57,24 @@ public sealed class RequestLoggingMiddleware
         diagnostics.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task DoesNotReportConsoleWriteInsideCliCommandAsync()
+    {
+        const string source = """
+public sealed class RetirePlanCommand
+{
+    public void Execute()
+    {
+        Console.Out.WriteLine("retiring");
+    }
+}
+""";
+
+        var diagnostics = await GetDiagnosticsAsync(source, "src/Meridian.CLI/Commands/Subscription/RetirePlanCommand.cs");
+
+        diagnostics.Should().BeEmpty();
+    }
+
     private static async Task<IReadOnlyCollection<Microsoft.CodeAnalysis.Diagnostic>> GetDiagnosticsAsync(
         string source,
         string path)
