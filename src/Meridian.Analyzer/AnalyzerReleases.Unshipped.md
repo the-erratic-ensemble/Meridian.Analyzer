@@ -4,7 +4,7 @@
 ### New Rules
 
 Rule ID | Category | Severity | Notes
---------|----------|----------|------
+--------|----------|----------|--------------------
 MER0001 | Meridian.Readability | Warning | Do not use conditional expressions directly in object and anonymous-object initializer members.
 MER0002 | Meridian.Readability | Warning | Do not hide fallback flow in broad nested try/catch blocks inside another try block.
 MER0003 | Meridian.Security | Warning | Do not combine output caching with tenant, entitlement, quota, plan, or policy-sensitive endpoint metadata.
@@ -31,6 +31,6 @@ MER0023 | Meridian.Reliability | Warning | Own detached runtime tasks with expli
 MER0024 | Meridian.Reliability | Warning | Avoid shared string extension guards inside IQueryable and expression predicates.
 MER0025 | Meridian.Readability | Warning | Avoid empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })`.
 MER0026 | Meridian.Readability | Warning | Avoid deeply nested ternary chains by extracting named classification steps.
-MER0027 | Meridian.Readability | Warning | Extract named predicates from overly long boolean `&&` and `||` chains.
+MER0027 | Meridian.Readability | Warning | Extract named predicates from overly long chained boolean expressions.
 MER0028 | Meridian.Readability | Warning | Move heavy multi-line initializer-member expressions into named locals or helpers.
 MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with seven or more chained query calls.

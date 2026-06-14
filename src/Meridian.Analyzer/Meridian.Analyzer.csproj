@@ -16,6 +16,7 @@
     <PackageTags>roslyn;roslyn-analyzer;analyzers;csharp;dotnet;static-analysis;code-quality;meridian</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/the-erratic-ensemble/Meridian.Analyzer</RepositoryUrl>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
