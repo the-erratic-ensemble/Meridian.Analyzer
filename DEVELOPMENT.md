@@ -50,4 +50,4 @@ Configure severities in the target project's `.editorconfig` or equivalent analy
 ## Notes
 
 - `nuget.org` publishes packages publicly.
-- If you rename the package ID or GitHub repo again later, update `README.md`, `version.txt`, and the workflow files in one change.
+- If the package ID or GitHub repository name changes, update `README.md`, `version.txt`, and the workflow files in one change.

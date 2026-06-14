@@ -39,12 +39,3 @@ Analyzer diagnostics will surface according to the severities configured by the 
   <PackageReference Include="Meridian.Analyzer" Version="0.2.*" PrivateAssets="all" />
 </ItemGroup>
 ```
-
-## Local Maintainer Checks
-
-When editing this repository itself:
-
-```bash
-dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
-dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts
-```
