@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -84,6 +85,57 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
         context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
     }
 
+    private readonly struct AnalysisScope
+    {
+        internal AnalysisScope(Compilation compilation, SemanticModel semanticModel, CancellationToken cancellationToken)
+            : this(
+                compilation,
+                semanticModel,
+                cancellationToken,
+                ImmutableHashSet.Create<ISymbol>(SymbolEqualityComparer.Default))
+        {
+        }
+
+        private AnalysisScope(
+            Compilation compilation,
+            SemanticModel semanticModel,
+            CancellationToken cancellationToken,
+            ImmutableHashSet<ISymbol> activeSymbols)
+        {
+            Compilation = compilation;
+            SemanticModel = semanticModel;
+            CancellationToken = cancellationToken;
+            ActiveSymbols = activeSymbols;
+        }
+
+        internal Compilation Compilation { get; }
+
+        internal SemanticModel SemanticModel { get; }
+
+        internal CancellationToken CancellationToken { get; }
+
+        private ImmutableHashSet<ISymbol> ActiveSymbols { get; }
+
+        internal AnalysisScope ForSyntaxTree(SyntaxTree syntaxTree)
+        {
+            return SemanticModel.SyntaxTree == syntaxTree
+                ? this
+                : new AnalysisScope(Compilation, Compilation.GetSemanticModel(syntaxTree), CancellationToken, ActiveSymbols);
+        }
+
+        internal bool TryEnterSymbol(ISymbol symbol, out AnalysisScope nestedScope)
+        {
+            if (ActiveSymbols.Contains(symbol))
+            {
+                nestedScope = default;
+                return false;
+            }
+
+            nestedScope = new AnalysisScope(Compilation, SemanticModel, CancellationToken, ActiveSymbols.Add(symbol));
+            return true;
+        }
+    }
+
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
         if (context.Node is not InvocationExpressionSyntax invocation || IsApprovedLocation(invocation.SyntaxTree.FilePath))
@@ -97,7 +149,9 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
             return;
         }
 
-        if (ExpressionHasVisibleBound(context, memberAccess.Expression, invocation) ||
+        var scope = new AnalysisScope(context.Compilation, context.SemanticModel, context.CancellationToken);
+
+        if (ExpressionHasVisibleBound(scope, memberAccess.Expression, invocation) ||
             IsIntentionalFullMaterializationBoundary(invocation))
         {
             return;
@@ -113,18 +167,18 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
             .Any(invocation => methodNames.Any(name => string.Equals(MeridianAnalyzerRuleHelpers.GetSimpleInvocationName(invocation), name, StringComparison.Ordinal)));
     }
 
-    private static bool ExpressionHasVisibleBound(SyntaxNodeAnalysisContext context, ExpressionSyntax receiver, SyntaxNode? currentNode = null)
+    private static bool ExpressionHasVisibleBound(AnalysisScope scope, ExpressionSyntax receiver, SyntaxNode? currentNode = null)
     {
         return ChainContainsInvocation(receiver, BoundingMethodNames) ||
                ChainContainsInvocation(receiver, AggregateBoundingMethodNames) ||
                QuerySyntaxContainsWhere(receiver) ||
                RawSqlContainsBoundingTerm(receiver) ||
-               ReceiverChainComesFromVisibleBound(context, receiver) ||
-               ChainContainsBoundedLocalIdentifier(context, receiver) ||
-               ReceiverComesFromBoundedLocal(context, receiver) ||
-               ReceiverWasAssignedBoundedExpressionBeforeUse(context, receiver, currentNode) ||
-               ReceiverComesFromBoundedMethod(context, receiver) ||
-               ChainContainsBoundedMethodInvocation(context, receiver);
+               ReceiverChainComesFromVisibleBound(scope, receiver) ||
+               ChainContainsBoundedLocalIdentifier(scope, receiver) ||
+               ReceiverComesFromBoundedLocal(scope, receiver) ||
+               ReceiverWasAssignedBoundedExpressionBeforeUse(scope, receiver, currentNode) ||
+               ReceiverComesFromBoundedMethod(scope, receiver) ||
+               ChainContainsBoundedMethodInvocation(scope, receiver);
     }
 
     private static bool QuerySyntaxContainsWhere(SyntaxNode node)
@@ -158,31 +212,41 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
                string.Equals(invocationName, "SqlQueryRaw", StringComparison.Ordinal);
     }
 
-    private static bool ReceiverComesFromBoundedLocal(SyntaxNodeAnalysisContext context, ExpressionSyntax receiver)
+    private static bool ReceiverComesFromBoundedLocal(AnalysisScope scope, ExpressionSyntax receiver)
     {
         if (receiver is not IdentifierNameSyntax identifierName ||
-            context.SemanticModel.GetSymbolInfo(identifierName, context.CancellationToken).Symbol is not ILocalSymbol localSymbol)
+            scope.SemanticModel.GetSymbolInfo(identifierName, scope.CancellationToken).Symbol is not ILocalSymbol localSymbol)
+        {
+            return false;
+        }
+
+        if (!scope.TryEnterSymbol(localSymbol, out var localScope))
         {
             return false;
         }
 
         var declaration = localSymbol.DeclaringSyntaxReferences
-            .Select(reference => reference.GetSyntax(context.CancellationToken))
+            .Select(reference => reference.GetSyntax(localScope.CancellationToken))
             .OfType<VariableDeclaratorSyntax>()
             .FirstOrDefault();
 
         return declaration?.Initializer?.Value is { } initializer &&
-               ExpressionHasVisibleBound(context, initializer);
+               ExpressionHasVisibleBound(localScope.ForSyntaxTree(initializer.SyntaxTree), initializer);
     }
 
     private static bool ReceiverWasAssignedBoundedExpressionBeforeUse(
-        SyntaxNodeAnalysisContext context,
+        AnalysisScope scope,
         ExpressionSyntax receiver,
         SyntaxNode? currentNode)
     {
         if (receiver is not IdentifierNameSyntax identifierName ||
             currentNode is null ||
-            context.SemanticModel.GetSymbolInfo(identifierName, context.CancellationToken).Symbol is not ILocalSymbol localSymbol)
+            scope.SemanticModel.GetSymbolInfo(identifierName, scope.CancellationToken).Symbol is not ILocalSymbol localSymbol)
+        {
+            return false;
+        }
+
+        if (!scope.TryEnterSymbol(localSymbol, out var localScope))
         {
             return false;
         }
@@ -197,48 +261,51 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
             .OfType<AssignmentExpressionSyntax>()
             .Where(assignment => assignment.SpanStart < currentNode.SpanStart)
             .Any(assignment =>
-                AssignmentTargetsLocal(context, assignment.Left, localSymbol) &&
-                ExpressionHasVisibleBound(context, assignment.Right, assignment));
+                AssignmentTargetsLocal(localScope, assignment.Left, localSymbol) &&
+                ExpressionHasVisibleBound(localScope, assignment.Right, assignment));
     }
 
-    private static bool AssignmentTargetsLocal(SyntaxNodeAnalysisContext context, ExpressionSyntax left, ILocalSymbol localSymbol)
+    private static bool AssignmentTargetsLocal(AnalysisScope scope, ExpressionSyntax left, ILocalSymbol localSymbol)
     {
         return left is IdentifierNameSyntax identifierName &&
                SymbolEqualityComparer.Default.Equals(
-                   context.SemanticModel.GetSymbolInfo(identifierName, context.CancellationToken).Symbol,
+                   scope.SemanticModel.GetSymbolInfo(identifierName, scope.CancellationToken).Symbol,
                    localSymbol);
     }
 
-    private static bool ReceiverComesFromBoundedMethod(SyntaxNodeAnalysisContext context, ExpressionSyntax receiver)
+    private static bool ReceiverComesFromBoundedMethod(AnalysisScope scope, ExpressionSyntax receiver)
     {
-        if (receiver is not InvocationExpressionSyntax invocation ||
-            context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is not IMethodSymbol methodSymbol)
+        if (receiver is not InvocationExpressionSyntax invocation)
         {
             return false;
         }
 
-        return methodSymbol.DeclaringSyntaxReferences
-            .Select(reference => reference.GetSyntax(context.CancellationToken))
-            .OfType<MethodDeclarationSyntax>()
-            .Any(method => MethodReturnsBoundedQuery(context, method)) ||
-               ReceiverComesFromSyntacticallyBoundedMethod(context, invocation);
+        if (scope.SemanticModel.GetSymbolInfo(invocation, scope.CancellationToken).Symbol is IMethodSymbol methodSymbol)
+        {
+            return methodSymbol.DeclaringSyntaxReferences
+                .Select(reference => reference.GetSyntax(scope.CancellationToken))
+                .OfType<MethodDeclarationSyntax>()
+                .Any(method => MethodReturnsBoundedQuery(scope.ForSyntaxTree(method.SyntaxTree), method));
+        }
+
+        return ReceiverComesFromSyntacticallyBoundedMethod(scope, invocation);
     }
 
-    private static bool ChainContainsBoundedMethodInvocation(SyntaxNodeAnalysisContext context, SyntaxNode node)
+    private static bool ChainContainsBoundedMethodInvocation(AnalysisScope scope, SyntaxNode node)
     {
         return node.DescendantNodesAndSelf()
             .OfType<InvocationExpressionSyntax>()
-            .Any(invocation => ReceiverComesFromBoundedMethod(context, invocation));
+            .Any(invocation => ReceiverComesFromBoundedMethod(scope, invocation));
     }
 
-    private static bool ChainContainsBoundedLocalIdentifier(SyntaxNodeAnalysisContext context, SyntaxNode node)
+    private static bool ChainContainsBoundedLocalIdentifier(AnalysisScope scope, SyntaxNode node)
     {
         return node.DescendantNodesAndSelf()
             .OfType<IdentifierNameSyntax>()
-            .Any(identifier => ReceiverComesFromBoundedLocal(context, identifier));
+            .Any(identifier => ReceiverComesFromBoundedLocal(scope, identifier));
     }
 
-    private static bool ReceiverComesFromSyntacticallyBoundedMethod(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static bool ReceiverComesFromSyntacticallyBoundedMethod(AnalysisScope scope, InvocationExpressionSyntax invocation)
     {
         var invocationName = MeridianAnalyzerRuleHelpers.GetSimpleInvocationName(invocation);
         var containingClass = MeridianAnalyzerRuleHelpers.GetContainingClass(invocation);
@@ -250,36 +317,43 @@ public sealed class MER0017AvoidUnboundedEfMaterializationAnalyzer : DiagnosticA
         return containingClass.Members
             .OfType<MethodDeclarationSyntax>()
             .Where(method => string.Equals(method.Identifier.ValueText, invocationName, StringComparison.Ordinal))
-            .Any(method => MethodReturnsBoundedQuery(context, method));
+            .Any(method => MethodReturnsBoundedQuery(scope.ForSyntaxTree(method.SyntaxTree), method));
     }
 
-    private static bool ReceiverChainComesFromVisibleBound(SyntaxNodeAnalysisContext context, ExpressionSyntax receiver)
+    private static bool ReceiverChainComesFromVisibleBound(AnalysisScope scope, ExpressionSyntax receiver)
     {
         return receiver switch
         {
-            IdentifierNameSyntax => ReceiverComesFromBoundedLocal(context, receiver),
-            InvocationExpressionSyntax invocation => InvocationReceiverComesFromVisibleBound(context, invocation),
-            MemberAccessExpressionSyntax memberAccess => ReceiverChainComesFromVisibleBound(context, memberAccess.Expression),
+            IdentifierNameSyntax => ReceiverComesFromBoundedLocal(scope, receiver),
+            InvocationExpressionSyntax invocation => InvocationReceiverComesFromVisibleBound(scope, invocation),
+            MemberAccessExpressionSyntax memberAccess => ReceiverChainComesFromVisibleBound(scope, memberAccess.Expression),
             _ => false
         };
     }
 
-    private static bool InvocationReceiverComesFromVisibleBound(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static bool InvocationReceiverComesFromVisibleBound(AnalysisScope scope, InvocationExpressionSyntax invocation)
     {
         return invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-               ReceiverChainComesFromVisibleBound(context, memberAccess.Expression);
+               ReceiverChainComesFromVisibleBound(scope, memberAccess.Expression);
     }
 
-    private static bool MethodReturnsBoundedQuery(SyntaxNodeAnalysisContext context, MethodDeclarationSyntax method)
+    private static bool MethodReturnsBoundedQuery(AnalysisScope scope, MethodDeclarationSyntax method)
     {
+        var methodScope = scope.ForSyntaxTree(method.SyntaxTree);
+        if (methodScope.SemanticModel.GetDeclaredSymbol(method, methodScope.CancellationToken) is IMethodSymbol methodSymbol &&
+            !methodScope.TryEnterSymbol(methodSymbol, out methodScope))
+        {
+            return false;
+        }
+
         if (method.ExpressionBody?.Expression is { } expressionBody)
         {
-            return ExpressionHasVisibleBound(context, expressionBody);
+            return ExpressionHasVisibleBound(methodScope, expressionBody);
         }
 
         return method.Body?.Statements
             .OfType<ReturnStatementSyntax>()
-            .Any(statement => statement.Expression is { } expression && ExpressionHasVisibleBound(context, expression)) == true;
+            .Any(statement => statement.Expression is { } expression && ExpressionHasVisibleBound(methodScope, expression)) == true;
     }
 
     private static bool IsIntentionalFullMaterializationBoundary(SyntaxNode node)

@@ -130,6 +130,40 @@ public sealed class ReportRepository
     }
 
     [Fact]
+    public async Task DoesNotReportBoundedHelperQueryMaterializationAcrossFilesAsync()
+    {
+        const string repositorySource = """
+public sealed partial class ReportRepository
+{
+    public Task<object> GetAsync(dynamic reports)
+    {
+        return BuildQuery(reports).ToListAsync();
+    }
+}
+""";
+
+        const string helperSource = """
+public sealed partial class ReportRepository
+{
+    private dynamic BuildQuery(dynamic reports)
+    {
+        return reports.Where(report => report.IsActive).Take(100);
+    }
+}
+""";
+
+        var diagnostics = await AnalyzerTestHost.GetDiagnosticsAsync(
+            new[]
+            {
+                (repositorySource, "src/Infrastructure/Repositories/ReportRepository.cs"),
+                (helperSource, "src/Infrastructure/Repositories/ReportRepository.Helpers.cs")
+            },
+            new MER0017AvoidUnboundedEfMaterializationAnalyzer());
+
+        diagnostics.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task DoesNotReportBoundedLocalReassignmentAsync()
     {
         const string source = """
@@ -148,6 +182,34 @@ public sealed class ReportRepository
         var diagnostics = await GetDiagnosticsAsync(source);
 
         diagnostics.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ReportsRecursiveHelperChainWithoutVisibleBoundAsync()
+    {
+        const string source = """
+public sealed class ReportRepository
+{
+    public Task<object> GetAsync(dynamic reports)
+    {
+        return BuildQuery(reports).ToListAsync();
+    }
+
+    private dynamic BuildQuery(dynamic reports)
+    {
+        return BuildQueryCore(reports);
+    }
+
+    private dynamic BuildQueryCore(dynamic reports)
+    {
+        return BuildQuery(reports);
+    }
+}
+""";
+
+        var diagnostics = await GetDiagnosticsAsync(source);
+
+        diagnostics.Should().ContainSingle(diagnostic => diagnostic.Id == MER0017AvoidUnboundedEfMaterializationAnalyzer.DiagnosticId);
     }
 
     [Fact]
