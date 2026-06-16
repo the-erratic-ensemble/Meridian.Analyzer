@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.4.0...v0.4.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* **ci:** stop release-please workflow validation failure ([#22](https://github.com/the-erratic-ensemble/Meridian.Analyzer/issues/22)) ([9b3a89d](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/9b3a89d960eff06ec377b94082eab76f9f0427a6))
+* detect bounded MER0017 helper queries across files ([#21](https://github.com/the-erratic-ensemble/Meridian.Analyzer/issues/21)) ([c3d3e58](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/c3d3e587051441fc6be4482ecbb15bbd648ee91d))
+
 ## [0.4.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.3.0...v0.4.0) (2026-06-14)
 
 
