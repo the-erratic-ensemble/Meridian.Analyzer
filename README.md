@@ -98,6 +98,8 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Long LINQ and EF chains](docs/rules/MER0029.md) | `MER0029` | Readability | Break long fluent query chains into named intermediate steps |
 | [Per-iteration loop try/catch nesting](docs/rules/MER0030.md) | `MER0030` | Readability | Extract iteration work into a helper or result-returning boundary before outer loop shutdown handling |
 | [Nested collection-trimming while loops](docs/rules/MER0031.md) | `MER0031` | Readability | Move trimming loops into a named helper or bounded collection abstraction |
+| [Inline conditional record rewrites](docs/rules/MER0032.md) | `MER0032` | Readability | Move conditional record clones with multiple or nested member updates into named helpers |
+| [Heavy inline query lambdas](docs/rules/MER0033.md) | `MER0033` | Readability | Move large query lambdas into named query steps or helpers |
 
 ## Rule-Addition Checklist
 

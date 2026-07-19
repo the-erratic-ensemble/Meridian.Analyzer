@@ -36,3 +36,5 @@ MER0028 | Meridian.Readability | Warning | Move heavy multi-line initializer-mem
 MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with seven or more chained query calls.
 MER0030 | Meridian.Readability | Warning | Extract broad per-iteration try/catch blocks from nested while-loop and outer try control flow.
 MER0031 | Meridian.Readability | Warning | Extract nested collection-trimming while loops into named helpers or bounded collection abstractions.
+MER0032 | Meridian.Readability | Warning | Extract conditional LINQ projections that clone a record and rewrite multiple or nested members inline.
+MER0033 | Meridian.Readability | Warning | Extract heavy multi-line query lambdas into named query steps or helpers.
