@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -13,8 +14,10 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
     private const int MinimumChainedInvocationCount = 8;
 
     private static readonly LocalizableString Title = "Avoid overly long LINQ or EF fluent chains";
+
     private static readonly LocalizableString MessageFormat =
         "Review this {0}-call LINQ or EF chain; extract named steps or intermediate locals";
+
     private static readonly LocalizableString Description =
         "Long LINQ and EF fluent chains are hard to review because filtering, shaping, ordering, and materialization all blur together in one expression. " +
         "Split longer chains into named intermediate query steps.";
@@ -25,8 +28,8 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -34,32 +37,21 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeInvocation, Microsoft.CodeAnalysis.CSharp.SyntaxKind.InvocationExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
     }
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation) return;
 
-        if (!IsQueryChainInvocation(context, invocation))
-        {
-            return;
-        }
+        if (!IsQueryChainInvocation(context, invocation)) return;
 
         if (TryGetParentChainedInvocation(invocation, out var parentInvocation) &&
             IsQueryChainInvocation(context, parentInvocation))
-        {
             return;
-        }
 
         var chainLength = CountQueryChainInvocations(context, invocation);
-        if (chainLength < MinimumChainedInvocationCount)
-        {
-            return;
-        }
+        if (chainLength < MinimumChainedInvocationCount) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation(), chainLength));
     }
@@ -69,7 +61,7 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
         InvocationExpressionSyntax invocation)
     {
         var count = 0;
-        InvocationExpressionSyntax? current = invocation;
+        var current = invocation;
 
         while (current is not null && IsQueryChainInvocation(context, current))
         {
@@ -79,9 +71,7 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
 
         if (count > 0 && GetInnermostQueryChainInvocation(context, invocation) is { } innermostInvocation &&
             IsAsNoTrackingInvocation(innermostInvocation))
-        {
             count--;
-        }
 
         return count;
     }
@@ -90,13 +80,12 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
         SyntaxNodeAnalysisContext context,
         InvocationExpressionSyntax invocation)
     {
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return false;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return false;
 
-        var receiverType = context.SemanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
-        var invocationTypeInfo = context.SemanticModel.GetTypeInfo(invocation, context.CancellationToken);
+        var receiverType = ModelExtensions
+            .GetTypeInfo(context.SemanticModel, memberAccess.Expression, context.CancellationToken).Type;
+        var invocationTypeInfo =
+            ModelExtensions.GetTypeInfo(context.SemanticModel, invocation, context.CancellationToken);
         var invocationType = invocationTypeInfo.Type ?? invocationTypeInfo.ConvertedType;
         return IsQueryLikeType(receiverType) || IsQueryLikeType(invocationType);
     }
@@ -109,9 +98,7 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
 
         if (invocation.Parent is not MemberAccessExpressionSyntax memberAccess ||
             memberAccess.Parent is not InvocationExpressionSyntax parent)
-        {
             return false;
-        }
 
         parentInvocation = parent;
         return true;
@@ -119,7 +106,10 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
 
     private static InvocationExpressionSyntax? GetReceiverInvocation(InvocationExpressionSyntax invocation)
     {
-        return invocation.Expression is MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax receiverInvocation }
+        return invocation.Expression is MemberAccessExpressionSyntax
+        {
+            Expression: InvocationExpressionSyntax receiverInvocation
+        }
             ? receiverInvocation
             : null;
     }
@@ -128,7 +118,7 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
         SyntaxNodeAnalysisContext context,
         InvocationExpressionSyntax invocation)
     {
-        InvocationExpressionSyntax? current = invocation;
+        var current = invocation;
         InvocationExpressionSyntax? innermost = null;
 
         while (current is not null && IsQueryChainInvocation(context, current))
@@ -148,25 +138,16 @@ public sealed class MER0029AvoidLongLinqChainAnalyzer : DiagnosticAnalyzer
 
     private static bool IsQueryLikeType(ITypeSymbol? typeSymbol)
     {
-        if (typeSymbol is null || typeSymbol.SpecialType == SpecialType.System_String)
-        {
-            return false;
-        }
+        if (typeSymbol is null || typeSymbol.SpecialType == SpecialType.System_String) return false;
 
-        if (MatchesQueryLikeType(typeSymbol))
-        {
-            return true;
-        }
+        if (MatchesQueryLikeType(typeSymbol)) return true;
 
         return typeSymbol.AllInterfaces.Any(MatchesQueryLikeType);
     }
 
     private static bool MatchesQueryLikeType(ITypeSymbol typeSymbol)
     {
-        if (typeSymbol is not INamedTypeSymbol namedType)
-        {
-            return false;
-        }
+        if (typeSymbol is not INamedTypeSymbol namedType) return false;
 
         var namespaceName = namedType.ContainingNamespace?.ToDisplayString();
         return (namespaceName, namedType.MetadataName) switch

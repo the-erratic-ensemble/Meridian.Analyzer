@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -10,9 +11,12 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "MER0030";
 
-    private static readonly LocalizableString Title = "Avoid broad per-iteration try/catch inside nested loop exception flow";
+    private static readonly LocalizableString Title =
+        "Avoid broad per-iteration try/catch inside nested loop exception flow";
+
     private static readonly LocalizableString MessageFormat =
         "Extract this broad per-iteration try/catch from the enclosing while loop and outer try flow";
+
     private static readonly LocalizableString Description =
         "A broad per-iteration try/catch inside a while loop that already sits inside outer try flow hides which failures end the loop, " +
         "which failures are logged and skipped, and which failures escape. Extract the iteration work into a helper or result-returning boundary.";
@@ -23,8 +27,8 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -32,35 +36,20 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeTryStatement, Microsoft.CodeAnalysis.CSharp.SyntaxKind.TryStatement);
+        context.RegisterSyntaxNodeAction(AnalyzeTryStatement, SyntaxKind.TryStatement);
     }
 
     private static void AnalyzeTryStatement(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not TryStatementSyntax tryStatement)
-        {
-            return;
-        }
+        if (context.Node is not TryStatementSyntax tryStatement) return;
 
-        if (tryStatement.Catches.Count == 0)
-        {
-            return;
-        }
+        if (tryStatement.Catches.Count == 0) return;
 
-        if (!HasBroadCatchThatContinuesControlFlow(tryStatement))
-        {
-            return;
-        }
+        if (!HasBroadCatchThatContinuesControlFlow(tryStatement)) return;
 
-        if (!TryGetEnclosingWhileStatement(tryStatement, out var enclosingWhile))
-        {
-            return;
-        }
+        if (!TryGetEnclosingWhileStatement(tryStatement, out var enclosingWhile)) return;
 
-        if (!HasEnclosingTryOutsideWhile(enclosingWhile))
-        {
-            return;
-        }
+        if (!HasEnclosingTryOutsideWhile(enclosingWhile)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, tryStatement.TryKeyword.GetLocation()));
     }
@@ -71,10 +60,7 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
     {
         foreach (var ancestor in tryStatement.Ancestors())
         {
-            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax)
-            {
-                break;
-            }
+            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax) break;
 
             if (ancestor is WhileStatementSyntax candidate)
             {
@@ -91,15 +77,9 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
     {
         foreach (var ancestor in whileStatement.Ancestors())
         {
-            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax)
-            {
-                return false;
-            }
+            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax) return false;
 
-            if (ancestor is TryStatementSyntax)
-            {
-                return true;
-            }
+            if (ancestor is TryStatementSyntax) return true;
         }
 
         return false;
@@ -109,15 +89,9 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
     {
         foreach (var catchClause in tryStatement.Catches)
         {
-            if (!IsBroadCatchClause(catchClause))
-            {
-                continue;
-            }
+            if (!IsBroadCatchClause(catchClause)) continue;
 
-            if (CatchTerminatesControlFlow(catchClause.Block))
-            {
-                continue;
-            }
+            if (CatchTerminatesControlFlow(catchClause.Block)) continue;
 
             return true;
         }
@@ -127,10 +101,7 @@ public sealed class MER0030AvoidNestedLoopTryCatchAnalyzer : DiagnosticAnalyzer
 
     private static bool IsBroadCatchClause(CatchClauseSyntax catchClause)
     {
-        if (catchClause.Declaration is null)
-        {
-            return true;
-        }
+        if (catchClause.Declaration is null) return true;
 
         return catchClause.Declaration.Type switch
         {

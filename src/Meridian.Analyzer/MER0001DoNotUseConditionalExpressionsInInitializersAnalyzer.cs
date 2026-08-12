@@ -11,8 +11,12 @@ public sealed class MER0001DoNotUseConditionalExpressionsInInitializersAnalyzer 
 {
     public const string DiagnosticId = "MER0001";
 
-    private static readonly LocalizableString Title = "Do not branch payload construction directly in initializer members";
-    private static readonly LocalizableString MessageFormat = "Stage payload-construction branches before object or anonymous-object initializers";
+    private static readonly LocalizableString Title =
+        "Do not branch payload construction directly in initializer members";
+
+    private static readonly LocalizableString MessageFormat =
+        "Stage payload-construction branches before object or anonymous-object initializers";
+
     private static readonly LocalizableString Description =
         "Conditional expressions that branch into object or anonymous-object payload construction hide branching inside initializer members. " +
         "Stage the branch in a named local or helper before building the initializer.";
@@ -23,8 +27,8 @@ public sealed class MER0001DoNotUseConditionalExpressionsInInitializersAnalyzer 
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -37,21 +41,13 @@ public sealed class MER0001DoNotUseConditionalExpressionsInInitializersAnalyzer 
 
     private static void AnalyzeConditionalExpression(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ConditionalExpressionSyntax conditionalExpression)
-        {
-            return;
-        }
+        if (context.Node is not ConditionalExpressionSyntax conditionalExpression) return;
 
         if (!IsDirectAnonymousObjectMemberExpression(conditionalExpression) &&
             !IsDirectObjectInitializerAssignmentExpression(conditionalExpression))
-        {
             return;
-        }
 
-        if (!HasPayloadConstructionBranch(conditionalExpression))
-        {
-            return;
-        }
+        if (!HasPayloadConstructionBranch(conditionalExpression)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, conditionalExpression.GetLocation()));
     }

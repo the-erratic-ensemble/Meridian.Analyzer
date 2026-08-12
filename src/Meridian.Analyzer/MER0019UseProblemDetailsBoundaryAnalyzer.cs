@@ -12,7 +12,10 @@ public sealed class MER0019UseProblemDetailsBoundaryAnalyzer : DiagnosticAnalyze
     public const string DiagnosticId = "MER0019";
 
     private static readonly LocalizableString Title = "Use shared ProblemDetails helpers";
-    private static readonly LocalizableString MessageFormat = "Controller actions should use shared ProblemDetails helpers instead of constructing ProblemDetails inline";
+
+    private static readonly LocalizableString MessageFormat =
+        "Controller actions should use shared ProblemDetails helpers instead of constructing ProblemDetails inline";
+
     private static readonly LocalizableString Description =
         "Controller errors should use shared RFC 7807 mapping helpers so status codes, codes, and extensions remain consistent.";
 
@@ -22,8 +25,8 @@ public sealed class MER0019UseProblemDetailsBoundaryAnalyzer : DiagnosticAnalyze
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -36,21 +39,13 @@ public sealed class MER0019UseProblemDetailsBoundaryAnalyzer : DiagnosticAnalyze
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ObjectCreationExpressionSyntax objectCreation)
-        {
-            return;
-        }
+        if (context.Node is not ObjectCreationExpressionSyntax objectCreation) return;
 
         var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(objectCreation);
-        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod))
-        {
-            return;
-        }
+        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod)) return;
 
         var typeName = objectCreation.Type.ToString();
         if (typeName == "ProblemDetails" || typeName.EndsWith(".ProblemDetails", StringComparison.Ordinal))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, objectCreation.Type.GetLocation()));
-        }
     }
 }

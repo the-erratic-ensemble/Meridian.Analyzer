@@ -11,7 +11,8 @@ internal static class MeridianAnalyzerSyntaxHelpers
             .Any(attribute => IsAttributeNamed(attribute, attributeNames));
     }
 
-    internal static IEnumerable<AttributeSyntax> GetAttributes(MemberDeclarationSyntax member, params string[] attributeNames)
+    internal static IEnumerable<AttributeSyntax> GetAttributes(MemberDeclarationSyntax member,
+        params string[] attributeNames)
     {
         return member.AttributeLists
             .SelectMany(attributeList => attributeList.Attributes)
@@ -21,12 +22,14 @@ internal static class MeridianAnalyzerSyntaxHelpers
     internal static bool IsAttributeNamed(AttributeSyntax attribute, params string[] attributeNames)
     {
         var attributeName = NormalizeAttributeName(GetNameText(attribute.Name));
-        return attributeNames.Any(candidate => string.Equals(attributeName, NormalizeAttributeName(candidate), StringComparison.Ordinal));
+        return attributeNames.Any(candidate =>
+            string.Equals(attributeName, NormalizeAttributeName(candidate), StringComparison.Ordinal));
     }
 
     internal static bool InheritsFrom(ClassDeclarationSyntax classDeclaration, params string[] typeNames)
     {
-        return classDeclaration.BaseList?.Types.Any(baseType => {
+        return classDeclaration.BaseList?.Types.Any(baseType =>
+        {
             var typeName = GetTypeName(baseType.Type);
             return typeNames.Any(candidate => string.Equals(typeName, candidate, StringComparison.Ordinal));
         }) == true;

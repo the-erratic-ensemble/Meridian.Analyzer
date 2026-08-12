@@ -14,7 +14,10 @@ public sealed class MER0008ContainStartupBypassFlagsAnalyzer : DiagnosticAnalyze
     private const string StartupBypassPrefix = "MERIDIAN_SKIP_";
 
     private static readonly LocalizableString Title = "Keep startup bypass flags inside startup guard code";
-    private static readonly LocalizableString MessageFormat = "Move MERIDIAN_SKIP_* access behind StartupGuards or dedicated typed startup-skip options";
+
+    private static readonly LocalizableString MessageFormat =
+        "Move MERIDIAN_SKIP_* access behind StartupGuards or dedicated typed startup-skip options";
+
     private static readonly LocalizableString Description =
         "MERIDIAN_SKIP_* flags can disable production-significant validation or services. " +
         "Raw reads should stay in StartupGuards, tests, or dedicated typed startup-skip options.";
@@ -25,8 +28,8 @@ public sealed class MER0008ContainStartupBypassFlagsAnalyzer : DiagnosticAnalyze
         MessageFormat,
         MeridianDiagnosticCategories.Security,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -40,60 +43,37 @@ public sealed class MER0008ContainStartupBypassFlagsAnalyzer : DiagnosticAnalyze
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation) return;
 
         var bypassLiteral = GetStartupBypassLiteral(invocation, context);
-        if (bypassLiteral is null)
-        {
-            return;
-        }
+        if (bypassLiteral is null) return;
 
-        if (IsApprovedBypassLocation(context.Node.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (IsApprovedBypassLocation(context.Node.SyntaxTree.FilePath)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
     }
 
     private static void AnalyzeElementAccess(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ElementAccessExpressionSyntax elementAccess)
-        {
-            return;
-        }
+        if (context.Node is not ElementAccessExpressionSyntax elementAccess) return;
 
         var bypassLiteral = elementAccess.ArgumentList.Arguments
             .Select(argument => GetStringConstant(argument.Expression, context))
             .FirstOrDefault(IsStartupBypassKey);
-        if (bypassLiteral is null)
-        {
-            return;
-        }
+        if (bypassLiteral is null) return;
 
-        if (IsApprovedBypassLocation(context.Node.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (IsApprovedBypassLocation(context.Node.SyntaxTree.FilePath)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, elementAccess.GetLocation()));
     }
 
-    private static string? GetStartupBypassLiteral(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
+    private static string? GetStartupBypassLiteral(InvocationExpressionSyntax invocation,
+        SyntaxNodeAnalysisContext context)
     {
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return null;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return null;
 
         var methodName = MeridianAnalyzerSyntaxHelpers.GetSimpleName(memberAccess.Name);
-        if (methodName is not "GetEnvironmentVariable" and not "GetValue")
-        {
-            return null;
-        }
+        if (methodName is not "GetEnvironmentVariable" and not "GetValue") return null;
 
         return invocation.ArgumentList.Arguments
             .Select(argument => GetStringConstant(argument.Expression, context))
@@ -103,10 +83,7 @@ public sealed class MER0008ContainStartupBypassFlagsAnalyzer : DiagnosticAnalyze
     private static string? GetStringConstant(ExpressionSyntax expression, SyntaxNodeAnalysisContext context)
     {
         var literal = MeridianAnalyzerSyntaxHelpers.GetStringLiteral(expression);
-        if (literal is not null)
-        {
-            return literal;
-        }
+        if (literal is not null) return literal;
 
         var constantValue = context.SemanticModel.GetConstantValue(expression, context.CancellationToken);
         return constantValue is { HasValue: true, Value: string value }

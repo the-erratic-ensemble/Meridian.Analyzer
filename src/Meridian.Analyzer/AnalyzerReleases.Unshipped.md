@@ -27,7 +27,7 @@ MER0019 | Meridian.Reliability | Warning | Use shared ProblemDetails helpers ins
 MER0020 | Meridian.Architecture | Warning | Keep controller actions out of repository, DbContext, and EF query details.
 MER0021 | Meridian.Reliability | Warning | Use Serilog in runtime code outside framework adapters and hosting edges.
 MER0022 | Meridian.Performance | Warning | Route Redis keyspace scans through a dedicated bounded helper.
-MER0023 | Meridian.Reliability | Warning | Own detached runtime tasks with explicit lifetime, cancellation, and observability.
+MER0023 | Meridian.Reliability | Warning | Await, return, aggregate, or explicitly own task-returning work.
 MER0024 | Meridian.Reliability | Warning | Avoid shared string extension guards inside IQueryable and expression predicates.
 MER0025 | Meridian.Readability | Warning | Avoid empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })`.
 MER0026 | Meridian.Readability | Warning | Avoid deeply nested ternary chains by extracting named classification steps.
@@ -36,3 +36,7 @@ MER0028 | Meridian.Readability | Warning | Move heavy multi-line initializer-mem
 MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with seven or more chained query calls.
 MER0030 | Meridian.Readability | Warning | Extract broad per-iteration try/catch blocks from nested while-loop and outer try control flow.
 MER0031 | Meridian.Readability | Warning | Extract nested collection-trimming while loops into named helpers or bounded collection abstractions.
+MER0032 | Meridian.Readability | Warning | Extract conditional LINQ projections that clone a record and rewrite multiple or nested members inline.
+MER0033 | Meridian.Readability | Warning | Extract heavy multi-line query lambdas into named query steps or helpers.
+MER0034 | Meridian.Readability | Warning | Prefer shared ordinal string comparison helpers.
+MER0035 | Meridian.Reliability | Warning | Expose and forward cancellation from async route boundaries.

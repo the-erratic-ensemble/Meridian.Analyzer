@@ -10,9 +10,15 @@ namespace Meridian.Analyzer;
 public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "MER0004";
+    private const string AnalyticsEventsControllerName = "EventsController";
+    private const string AnalyticsEventsControllerNamespace = "Analytics.Controllers";
 
-    private static readonly LocalizableString Title = "Declare explicit authorization policy on high-risk controller surfaces";
-    private static readonly LocalizableString MessageFormat = "Declare an explicit authorization policy on admin or high-risk controller actions instead of relying only on inherited [Authorize]";
+    private static readonly LocalizableString Title =
+        "Declare explicit authorization policy on high-risk controller surfaces";
+
+    private static readonly LocalizableString MessageFormat =
+        "Declare an explicit authorization policy on admin or high-risk controller actions instead of relying only on inherited [Authorize]";
+
     private static readonly LocalizableString Description =
         "Base controller authorization proves authentication, not the required policy. " +
         "Admin and high-risk tenant/report/support/search/subscription/analytics controllers need explicit policy metadata.";
@@ -44,8 +50,6 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         "SubmitEventsDefault",
         "Health"
     };
-    private const string AnalyticsEventsControllerName = "EventsController";
-    private const string AnalyticsEventsControllerNamespace = "Analytics.Controllers";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -53,8 +57,8 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         MessageFormat,
         MeridianDiagnosticCategories.Security,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -70,23 +74,15 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
     {
         if (context.Symbol is not INamedTypeSymbol namedType ||
             namedType.TypeKind != TypeKind.Class)
-        {
             return;
-        }
 
         var classDeclarations = namedType.DeclaringSyntaxReferences
             .Select(reference => reference.GetSyntax(context.CancellationToken))
             .OfType<ClassDeclarationSyntax>()
             .ToArray();
-        if (classDeclarations.Length == 0)
-        {
-            return;
-        }
+        if (classDeclarations.Length == 0) return;
 
-        if (!classDeclarations.Any(MeridianAnalyzerSyntaxHelpers.IsControllerClass))
-        {
-            return;
-        }
+        if (!classDeclarations.Any(MeridianAnalyzerSyntaxHelpers.IsControllerClass)) return;
 
         var unexpectedAllowAnonymousClass = classDeclarations
             .FirstOrDefault(declaration => HasUnexpectedAllowAnonymous(declaration, declaration.SyntaxTree.FilePath));
@@ -96,67 +92,41 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
             return;
         }
 
-        if (!IsPolicyRequiredController(classDeclarations))
-        {
-            return;
-        }
+        if (!IsPolicyRequiredController(classDeclarations)) return;
 
         var actionMethods = classDeclarations
             .SelectMany(declaration => declaration.Members)
             .OfType<MethodDeclarationSyntax>()
             .Where(MeridianAnalyzerSyntaxHelpers.HasHttpMethodAttribute)
             .ToArray();
-        if (actionMethods.Length == 0)
-        {
-            return;
-        }
+        if (actionMethods.Length == 0) return;
 
-        if (actionMethods.Any(method => HasUnexpectedAllowAnonymous(method, method.SyntaxTree.FilePath)))
-        {
-            return;
-        }
+        if (actionMethods.Any(method => HasUnexpectedAllowAnonymous(method, method.SyntaxTree.FilePath))) return;
 
-        if (classDeclarations.Any(HasAuthorizePolicy) || actionMethods.All(HasAuthorizePolicy))
-        {
-            return;
-        }
+        if (classDeclarations.Any(HasAuthorizePolicy) || actionMethods.All(HasAuthorizePolicy)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclarations[0].Identifier.GetLocation()));
     }
 
     private static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not MethodDeclarationSyntax methodDeclaration)
-        {
-            return;
-        }
+        if (context.Node is not MethodDeclarationSyntax methodDeclaration) return;
 
-        if (!MeridianAnalyzerSyntaxHelpers.HasHttpMethodAttribute(methodDeclaration))
-        {
-            return;
-        }
+        if (!MeridianAnalyzerSyntaxHelpers.HasHttpMethodAttribute(methodDeclaration)) return;
 
-        if (methodDeclaration.Parent is not ClassDeclarationSyntax classDeclaration)
-        {
-            return;
-        }
+        if (methodDeclaration.Parent is not ClassDeclarationSyntax classDeclaration) return;
 
-        if (!MeridianAnalyzerSyntaxHelpers.IsControllerClass(classDeclaration))
-        {
-            return;
-        }
+        if (!MeridianAnalyzerSyntaxHelpers.IsControllerClass(classDeclaration)) return;
 
-        if (!HasUnexpectedAllowAnonymous(methodDeclaration, context.Node.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (!HasUnexpectedAllowAnonymous(methodDeclaration, context.Node.SyntaxTree.FilePath)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, methodDeclaration.Identifier.GetLocation()));
     }
 
     private static bool IsPolicyRequiredController(IEnumerable<ClassDeclarationSyntax> classDeclarations)
     {
-        return classDeclarations.Any(classDeclaration => {
+        return classDeclarations.Any(classDeclaration =>
+        {
             var filePath = classDeclaration.SyntaxTree.FilePath;
             return IsAdminController(classDeclaration, filePath) ||
                    MeridianAnalyzerSyntaxHelpers.PathContainsAny(filePath, HighRiskFeaturePathSegments) ||
@@ -169,7 +139,8 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         return classDeclaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal) ||
                MeridianAnalyzerSyntaxHelpers.InheritsFrom(classDeclaration, "AdminControllerBase") ||
                MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Features/Admin/Controllers/") ||
-               GetRouteTemplates(classDeclaration).Any(route => MeridianAnalyzerSyntaxHelpers.StartsWithOrdinal(route, "api/admin"));
+               GetRouteTemplates(classDeclaration).Any(route =>
+                   MeridianAnalyzerSyntaxHelpers.StartsWithOrdinal(route, "api/admin"));
     }
 
     private static bool IsHighRiskRoute(string route)
@@ -194,7 +165,7 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         return attribute.ArgumentList?.Arguments.Any(argument =>
             argument.NameEquals?.Name.Identifier.ValueText == "Policy" ||
             argument.NameColon?.Name.Identifier.ValueText == "Policy" ||
-            argument.NameEquals is null && argument.NameColon is null) == true;
+            (argument.NameEquals is null && argument.NameColon is null)) == true;
     }
 
     private static bool HasUnexpectedAllowAnonymous(MemberDeclarationSyntax member, string filePath)
@@ -211,8 +182,12 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
 
     private static bool IsApprovedAnalyticsEventsMethod(MemberDeclarationSyntax member)
     {
-        return member is MethodDeclarationSyntax { Parent: ClassDeclarationSyntax classDeclaration } methodDeclaration &&
-               IsClassInNamespace(classDeclaration, AnalyticsEventsControllerName, AnalyticsEventsControllerNamespace) &&
+        return member is MethodDeclarationSyntax
+        {
+            Parent: ClassDeclarationSyntax classDeclaration
+        } methodDeclaration &&
+               IsClassInNamespace(classDeclaration, AnalyticsEventsControllerName,
+                   AnalyticsEventsControllerNamespace) &&
                AnalyticsEventsAnonymousMethods.Contains(methodDeclaration.Identifier.ValueText, StringComparer.Ordinal);
     }
 
@@ -221,10 +196,7 @@ public sealed class MER0004RequireExplicitControllerAuthorizationPolicyAnalyzer 
         string className,
         string namespaceName)
     {
-        if (!string.Equals(classDeclaration.Identifier.ValueText, className, StringComparison.Ordinal))
-        {
-            return false;
-        }
+        if (!string.Equals(classDeclaration.Identifier.ValueText, className, StringComparison.Ordinal)) return false;
 
         var namespaceDeclaration = classDeclaration
             .Ancestors()

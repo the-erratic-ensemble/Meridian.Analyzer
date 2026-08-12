@@ -12,7 +12,10 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
     public const string DiagnosticId = "MER0005";
 
     private static readonly LocalizableString Title = "Keep a consistent admin controller shape";
-    private static readonly LocalizableString MessageFormat = "Admin controller surfaces must use the Admin*Controller name, api/admin route, and AdminControllerBase inheritance";
+
+    private static readonly LocalizableString MessageFormat =
+        "Admin controller surfaces must use the Admin*Controller name, api/admin route, and AdminControllerBase inheritance";
+
     private static readonly LocalizableString Description =
         "Admin routes are a higher-risk surface. Controllers under the admin surface should be named Admin*Controller, inherit AdminControllerBase, and expose api/admin routes.";
 
@@ -22,8 +25,8 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
         MessageFormat,
         MeridianDiagnosticCategories.Security,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -36,36 +39,18 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
 
     private static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ClassDeclarationSyntax classDeclaration)
-        {
-            return;
-        }
+        if (context.Node is not ClassDeclarationSyntax classDeclaration) return;
 
         var declarations = GetDeclarations(context, classDeclaration).ToArray();
-        if (!declarations.Any(MeridianAnalyzerSyntaxHelpers.IsControllerClass))
-        {
-            return;
-        }
+        if (!declarations.Any(MeridianAnalyzerSyntaxHelpers.IsControllerClass)) return;
 
-        if (!IsFirstDeclaration(classDeclaration, declarations))
-        {
-            return;
-        }
+        if (!IsFirstDeclaration(classDeclaration, declarations)) return;
 
-        if (!IsAdminSurface(declarations))
-        {
-            return;
-        }
+        if (!IsAdminSurface(declarations)) return;
 
-        if (declarations.Any(declaration => declaration.Modifiers.Any(SyntaxKind.AbstractKeyword)))
-        {
-            return;
-        }
+        if (declarations.Any(declaration => declaration.Modifiers.Any(SyntaxKind.AbstractKeyword))) return;
 
-        if (HasAdminShape(declarations))
-        {
-            return;
-        }
+        if (HasAdminShape(declarations)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation()));
     }
@@ -75,10 +60,7 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
         ClassDeclarationSyntax classDeclaration)
     {
         var symbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration, context.CancellationToken);
-        if (symbol is null)
-        {
-            return new[] { classDeclaration };
-        }
+        if (symbol is null) return new[] { classDeclaration };
 
         var declarations = symbol.DeclaringSyntaxReferences
             .Select(reference => reference.GetSyntax(context.CancellationToken))
@@ -106,16 +88,21 @@ public sealed class MER0005EnforceAdminControllerShapeAnalyzer : DiagnosticAnaly
     private static bool IsAdminSurface(IReadOnlyCollection<ClassDeclarationSyntax> declarations)
     {
         return declarations.Any(declaration =>
-            MeridianAnalyzerSyntaxHelpers.PathContains(declaration.SyntaxTree.FilePath, "/Features/Admin/Controllers/") ||
+            MeridianAnalyzerSyntaxHelpers.PathContains(declaration.SyntaxTree.FilePath,
+                "/Features/Admin/Controllers/") ||
             declaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal) ||
             GetRouteTemplates(declaration).Any(route => route.StartsWith("api/admin", StringComparison.Ordinal)));
     }
 
     private static bool HasAdminShape(IReadOnlyCollection<ClassDeclarationSyntax> declarations)
     {
-        return declarations.Any(declaration => declaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal)) &&
-               declarations.Any(declaration => MeridianAnalyzerSyntaxHelpers.InheritsFrom(declaration, "AdminControllerBase")) &&
-               declarations.Any(declaration => GetRouteTemplates(declaration).Any(route => route.StartsWith("api/admin", StringComparison.Ordinal)));
+        return declarations.Any(declaration =>
+                   declaration.Identifier.ValueText.StartsWith("Admin", StringComparison.Ordinal)) &&
+               declarations.Any(declaration =>
+                   MeridianAnalyzerSyntaxHelpers.InheritsFrom(declaration, "AdminControllerBase")) &&
+               declarations.Any(declaration =>
+                   GetRouteTemplates(declaration)
+                       .Any(route => route.StartsWith("api/admin", StringComparison.Ordinal)));
     }
 
     private static IEnumerable<string> GetRouteTemplates(MemberDeclarationSyntax member)

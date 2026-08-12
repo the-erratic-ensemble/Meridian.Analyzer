@@ -89,7 +89,7 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Controller data access](docs/rules/MER0020.md) | `MER0020` | Architecture | Delegate repository, DbContext, and EF work to services or facades |
 | [Non-Serilog runtime logging](docs/rules/MER0021.md) | `MER0021` | Reliability | Use Serilog in runtime code and keep framework logging at the edges |
 | [Direct Redis keyspace scans](docs/rules/MER0022.md) | `MER0022` | Performance | Route `IServer.Keys` scans through a dedicated bounded helper |
-| [Detached runtime tasks](docs/rules/MER0023.md) | `MER0023` | Reliability | Give background work an explicit lifetime, cancellation path, and observable failure path |
+| [Unowned runtime tasks](docs/rules/MER0023.md) | `MER0023` | Reliability | Await, return, aggregate, or explicitly own task-returning work |
 | [Queryable string-extension predicates](docs/rules/MER0024.md) | `MER0024` | Reliability | Replace `StringExtensions.IsNullOr*` inside queryable or expression-returning methods with translatable query guards |
 | [Empty is-pattern braces](docs/rules/MER0025.md) | `MER0025` | Readability | Replace empty property-pattern braces with shared nullable helpers or explicit null checks when behavior matches |
 | [Nested ternary chains](docs/rules/MER0026.md) | `MER0026` | Readability | Extract long ternary decision trees into named steps |
@@ -98,6 +98,10 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Long LINQ and EF chains](docs/rules/MER0029.md) | `MER0029` | Readability | Break long fluent query chains into named intermediate steps |
 | [Per-iteration loop try/catch nesting](docs/rules/MER0030.md) | `MER0030` | Readability | Extract iteration work into a helper or result-returning boundary before outer loop shutdown handling |
 | [Nested collection-trimming while loops](docs/rules/MER0031.md) | `MER0031` | Readability | Move trimming loops into a named helper or bounded collection abstraction |
+| [Inline conditional record rewrites](docs/rules/MER0032.md) | `MER0032` | Readability | Move conditional record clones with multiple or nested member updates into named helpers |
+| [Heavy inline query lambdas](docs/rules/MER0033.md) | `MER0033` | Readability | Move large query lambdas into named query steps or helpers |
+| [Direct ordinal string comparisons](docs/rules/MER0034.md) | `MER0034` | Readability | Use shared ordinal string comparison helpers |
+| [Missing route cancellation](docs/rules/MER0035.md) | `MER0035` | Reliability | Expose and forward cancellation from async route boundaries |
 
 ## Rule-Addition Checklist
 

@@ -12,7 +12,10 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzer :
     public const string DiagnosticId = "MER0006";
 
     private static readonly LocalizableString Title = "Do not use service location inside controller actions";
-    private static readonly LocalizableString MessageFormat = "Use constructor injection or [FromServices] method injection instead of resolving services from RequestServices inside controller actions";
+
+    private static readonly LocalizableString MessageFormat =
+        "Use constructor injection or [FromServices] method injection instead of resolving services from RequestServices inside controller actions";
+
     private static readonly LocalizableString Description =
         "Controller action service location hides dependencies from action signatures and weakens startup validation. " +
         "Use constructor injection for controller-wide collaborators or [FromServices] for action-specific collaborators.";
@@ -23,8 +26,8 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzer :
         MessageFormat,
         MeridianDiagnosticCategories.Architecture,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -37,53 +40,31 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzer :
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation) return;
 
-        if (!IsServiceResolutionInvocation(invocation, context))
-        {
-            return;
-        }
+        if (!IsServiceResolutionInvocation(invocation, context)) return;
 
-        if (!IsInsideControllerAction(invocation))
-        {
-            return;
-        }
+        if (!IsInsideControllerAction(invocation)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
     }
 
-    private static bool IsServiceResolutionInvocation(InvocationExpressionSyntax invocation, SyntaxNodeAnalysisContext context)
+    private static bool IsServiceResolutionInvocation(InvocationExpressionSyntax invocation,
+        SyntaxNodeAnalysisContext context)
     {
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return false;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return false;
 
         var methodName = MeridianAnalyzerSyntaxHelpers.GetSimpleName(memberAccess.Name);
-        if (methodName is not "GetService" and not "GetRequiredService")
-        {
-            return false;
-        }
+        if (methodName is not "GetService" and not "GetRequiredService") return false;
 
         var targetType = context.SemanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
-        if (IsServiceProviderType(targetType))
-        {
-            return true;
-        }
+        if (IsServiceProviderType(targetType)) return true;
 
-        var targetSymbolType = GetSymbolType(context.SemanticModel.GetSymbolInfo(memberAccess.Expression, context.CancellationToken).Symbol);
-        if (IsServiceProviderType(targetSymbolType))
-        {
-            return true;
-        }
+        var targetSymbolType = GetSymbolType(context.SemanticModel
+            .GetSymbolInfo(memberAccess.Expression, context.CancellationToken).Symbol);
+        if (IsServiceProviderType(targetSymbolType)) return true;
 
-        if (targetType is not null && targetType.TypeKind != TypeKind.Error)
-        {
-            return false;
-        }
+        if (targetType is not null && targetType.TypeKind != TypeKind.Error) return false;
 
         var targetText = memberAccess.Expression.ToString();
         return targetText.IndexOf("RequestServices", StringComparison.Ordinal) >= 0 ||
@@ -107,10 +88,7 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzer :
 
     private static bool IsServiceProviderType(ITypeSymbol? type)
     {
-        if (type is not INamedTypeSymbol namedType)
-        {
-            return false;
-        }
+        if (type is not INamedTypeSymbol namedType) return false;
 
         return IsSystemServiceProvider(namedType) ||
                namedType.AllInterfaces.Any(IsSystemServiceProvider);
@@ -125,10 +103,8 @@ public sealed class MER0006DoNotResolveServicesInsideControllerActionsAnalyzer :
     private static bool IsInsideControllerAction(SyntaxNode node)
     {
         var methodDeclaration = node.FirstAncestorOrSelf<MethodDeclarationSyntax>();
-        if (methodDeclaration is null || !MeridianAnalyzerSyntaxHelpers.HasHttpMethodAttribute(methodDeclaration))
-        {
-            return false;
-        }
+        if (methodDeclaration is null ||
+            !MeridianAnalyzerSyntaxHelpers.HasHttpMethodAttribute(methodDeclaration)) return false;
 
         return methodDeclaration.Parent is ClassDeclarationSyntax classDeclaration &&
                MeridianAnalyzerSyntaxHelpers.IsControllerClass(classDeclaration);

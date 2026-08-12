@@ -12,7 +12,10 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
     public const string DiagnosticId = "MER0010";
 
     private static readonly LocalizableString Title = "Use a clock abstraction or TimeProvider";
-    private static readonly LocalizableString MessageFormat = "Runtime code should use IClock or TimeProvider instead of direct system time, raw Task.Delay, or raw timers";
+
+    private static readonly LocalizableString MessageFormat =
+        "Runtime code should use IClock or TimeProvider instead of direct system time, raw Task.Delay, or raw timers";
+
     private static readonly LocalizableString Description =
         "Direct time access and raw delays make request and background behaviour harder to test deterministically.";
 
@@ -42,8 +45,8 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -61,43 +64,30 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
         if (context.Node is not MemberAccessExpressionSyntax memberAccess ||
             IsApprovedLocation(context.Node.SyntaxTree.FilePath) ||
             IsPassiveModelDefault(memberAccess))
-        {
             return;
-        }
 
-        if (IsClockMember(memberAccess))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, memberAccess.GetLocation()));
-        }
+        if (IsClockMember(memberAccess)) context.ReportDiagnostic(Diagnostic.Create(Rule, memberAccess.GetLocation()));
     }
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation || IsApprovedLocation(context.Node.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation ||
+            IsApprovedLocation(context.Node.SyntaxTree.FilePath)) return;
 
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
             string.Equals(memberAccess.Expression.ToString(), "Task", StringComparison.Ordinal) &&
             string.Equals(memberAccess.Name.Identifier.ValueText, "Delay", StringComparison.Ordinal))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
     }
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ObjectCreationExpressionSyntax objectCreation || IsApprovedLocation(context.Node.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not ObjectCreationExpressionSyntax objectCreation ||
+            IsApprovedLocation(context.Node.SyntaxTree.FilePath)) return;
 
         var typeName = objectCreation.Type.ToString();
         if (typeName is "Timer" or "System.Threading.Timer" or "PeriodicTimer" or "System.Threading.PeriodicTimer")
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, objectCreation.Type.GetLocation()));
-        }
     }
 
     private static bool IsClockMember(MemberAccessExpressionSyntax memberAccess)
@@ -105,7 +95,7 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
         var receiver = memberAccess.Expression.ToString();
         var memberName = memberAccess.Name.Identifier.ValueText;
 
-        return (receiver is "DateTime" or "System.DateTime" or "DateTimeOffset" or "System.DateTimeOffset") &&
+        return receiver is "DateTime" or "System.DateTime" or "DateTimeOffset" or "System.DateTimeOffset" &&
                memberName is "UtcNow" or "Now";
     }
 
@@ -118,9 +108,7 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
     private static bool IsPassiveModelDefault(SyntaxNode node)
     {
         if (!MeridianAnalyzerSyntaxHelpers.PathContainsAny(node.SyntaxTree.FilePath, PassiveModelPathSegments))
-        {
             return false;
-        }
 
         return node.Ancestors()
             .OfType<EqualsValueClauseSyntax>()
@@ -129,6 +117,9 @@ public sealed class MER0010UseClockAndTimeProviderBoundariesAnalyzer : Diagnosti
 
     private static bool IsPropertyOrFieldInitializer(EqualsValueClauseSyntax initializer)
     {
-        return initializer.Parent is PropertyDeclarationSyntax or VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax };
+        return initializer.Parent is PropertyDeclarationSyntax or VariableDeclaratorSyntax
+        {
+            Parent.Parent: FieldDeclarationSyntax
+        };
     }
 }

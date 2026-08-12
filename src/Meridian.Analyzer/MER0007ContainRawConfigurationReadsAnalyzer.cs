@@ -12,7 +12,10 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
     public const string DiagnosticId = "MER0007";
 
     private static readonly LocalizableString Title = "Contain raw configuration and environment reads";
-    private static readonly LocalizableString MessageFormat = "Move raw configuration/environment reads behind typed options, startup guards, or provider adapters";
+
+    private static readonly LocalizableString MessageFormat =
+        "Move raw configuration/environment reads behind typed options, startup guards, or provider adapters";
+
     private static readonly LocalizableString Description =
         "Direct Environment and IConfiguration reads bypass typed option validation and the Meridian configuration catalog. Runtime feature code should depend on validated options instead.";
 
@@ -39,8 +42,8 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -54,28 +57,20 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation || IsApprovedLocation(invocation.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation ||
+            IsApprovedLocation(invocation.SyntaxTree.FilePath)) return;
 
         if (IsEnvironmentRead(invocation) || IsConfigurationLookup(invocation))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
     }
 
     private static void AnalyzeElementAccess(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ElementAccessExpressionSyntax elementAccess || IsApprovedLocation(elementAccess.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not ElementAccessExpressionSyntax elementAccess ||
+            IsApprovedLocation(elementAccess.SyntaxTree.FilePath)) return;
 
         if (LooksLikeConfigurationReceiver(elementAccess.Expression.ToString()))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, elementAccess.GetLocation()));
-        }
     }
 
     private static bool IsEnvironmentRead(InvocationExpressionSyntax invocation)
@@ -87,10 +82,7 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
 
     private static bool IsConfigurationLookup(InvocationExpressionSyntax invocation)
     {
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return false;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return false;
 
         var memberName = memberAccess.Name.Identifier.ValueText;
         return memberName is "GetValue" or "GetSection" or "GetRequiredSection" or "GetConnectionString" &&

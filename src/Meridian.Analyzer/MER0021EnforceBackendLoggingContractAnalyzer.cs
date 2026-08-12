@@ -12,7 +12,10 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
     public const string DiagnosticId = "MER0021";
 
     private static readonly LocalizableString Title = "Use Serilog in runtime code";
-    private static readonly LocalizableString MessageFormat = "Avoid Microsoft ILogger<T> or Console logging in runtime code outside framework adapters";
+
+    private static readonly LocalizableString MessageFormat =
+        "Avoid Microsoft ILogger<T> or Console logging in runtime code outside framework adapters";
+
     private static readonly LocalizableString Description =
         "Runtime code standardizes on Serilog. Microsoft ILogger<T> and Console output should stay in framework adapters, hosting edges, CLI tools, or explicitly documented exceptions.";
 
@@ -43,8 +46,8 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -59,49 +62,32 @@ public sealed class MER0021EnforceBackendLoggingContractAnalyzer : DiagnosticAna
 
     private static void AnalyzeParameter(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ParameterSyntax parameter || IsApprovedLocation(parameter.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not ParameterSyntax parameter || IsApprovedLocation(parameter.SyntaxTree.FilePath)) return;
 
         if (IsMicrosoftLoggerType(parameter.Type))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, parameter.GetLocation()));
-        }
     }
 
     private static void AnalyzeFieldDeclaration(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not FieldDeclarationSyntax fieldDeclaration || IsApprovedLocation(fieldDeclaration.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not FieldDeclarationSyntax fieldDeclaration ||
+            IsApprovedLocation(fieldDeclaration.SyntaxTree.FilePath)) return;
 
         if (IsMicrosoftLoggerType(fieldDeclaration.Declaration.Type))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, fieldDeclaration.Declaration.Type.GetLocation()));
-        }
     }
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation || IsApprovedLocation(invocation.SyntaxTree.FilePath))
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation ||
+            IsApprovedLocation(invocation.SyntaxTree.FilePath)) return;
 
-        if (IsConsoleWrite(invocation))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
+        if (IsConsoleWrite(invocation)) context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
     }
 
     private static bool IsMicrosoftLoggerType(TypeSyntax? type)
     {
-        if (type is null)
-        {
-            return false;
-        }
+        if (type is null) return false;
 
         var typeName = type.ToString();
         return typeName.StartsWith("ILogger<", StringComparison.Ordinal) ||
