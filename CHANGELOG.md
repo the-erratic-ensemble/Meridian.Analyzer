@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.4.1...v0.5.0) (2026-08-12)
+
+
+### Features
+
+* **analyzers:** add task ownership and boundary rules ([#29](https://github.com/the-erratic-ensemble/Meridian.Analyzer/issues/29)) ([a4c4af3](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/a4c4af36daec675956830cb5201d53b378ee1b38))
+
 ## [0.4.1](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.4.0...v0.4.1) (2026-06-16)
 
 
