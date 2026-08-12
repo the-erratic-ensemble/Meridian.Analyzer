@@ -12,7 +12,10 @@ public sealed class MER0020AvoidControllerRepositoryAccessAnalyzer : DiagnosticA
     public const string DiagnosticId = "MER0020";
 
     private static readonly LocalizableString Title = "Keep controller actions out of repository and DbContext details";
-    private static readonly LocalizableString MessageFormat = "Controller actions should delegate repository and DbContext work to a service or facade";
+
+    private static readonly LocalizableString MessageFormat =
+        "Controller actions should delegate repository and DbContext work to a service or facade";
+
     private static readonly LocalizableString Description =
         "Controllers should stay HTTP-focused. Direct repository, DbContext, or EF query work in action bodies grows coupling and bypasses feature-service abstractions.";
 
@@ -40,8 +43,8 @@ public sealed class MER0020AvoidControllerRepositoryAccessAnalyzer : DiagnosticA
         MessageFormat,
         MeridianDiagnosticCategories.Architecture,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -54,28 +57,17 @@ public sealed class MER0020AvoidControllerRepositoryAccessAnalyzer : DiagnosticA
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation)
-        {
-            return;
-        }
+        if (context.Node is not InvocationExpressionSyntax invocation) return;
 
         var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(invocation);
-        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod))
-        {
-            return;
-        }
+        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod)) return;
 
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return;
 
         var memberName = memberAccess.Name.Identifier.ValueText;
         if (LooksLikeRepositoryReceiver(context, memberAccess.Expression) ||
-            LooksLikeDbContextReceiver(context, memberAccess.Expression) && IsEfMethod(memberName))
-        {
+            (LooksLikeDbContextReceiver(context, memberAccess.Expression) && IsEfMethod(memberName)))
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
     }
 
     private static bool IsEfMethod(string memberName)
@@ -130,14 +122,10 @@ public sealed class MER0020AvoidControllerRepositoryAccessAnalyzer : DiagnosticA
     private static bool IsDbContextType(ITypeSymbol? typeSymbol)
     {
         for (var current = typeSymbol; current is not null; current = current.BaseType)
-        {
             if (current is INamedTypeSymbol namedType &&
                 (string.Equals(namedType.Name, "DbContext", StringComparison.Ordinal) ||
                  namedType.Name.EndsWith("DbContext", StringComparison.Ordinal)))
-            {
                 return true;
-            }
-        }
 
         return false;
     }

@@ -12,7 +12,10 @@ public sealed class MER0011AvoidStaticMutableControllerStateAnalyzer : Diagnosti
     public const string DiagnosticId = "MER0011";
 
     private static readonly LocalizableString Title = "Avoid static mutable state in controllers and auth handlers";
-    private static readonly LocalizableString MessageFormat = "Move static mutable controller/auth state into an injectable bounded service";
+
+    private static readonly LocalizableString MessageFormat =
+        "Move static mutable controller/auth state into an injectable bounded service";
+
     private static readonly LocalizableString Description =
         "Static mutable state hides lifecycle, eviction, test-isolation, and tenant-scope policy. Controllers and auth handlers should use explicit services for caches, log throttles, and timers.";
 
@@ -33,8 +36,8 @@ public sealed class MER0011AvoidStaticMutableControllerStateAnalyzer : Diagnosti
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -49,21 +52,13 @@ public sealed class MER0011AvoidStaticMutableControllerStateAnalyzer : Diagnosti
     {
         if (context.Node is not FieldDeclarationSyntax fieldDeclaration ||
             !MeridianAnalyzerRuleHelpers.HasModifier(fieldDeclaration.Modifiers, SyntaxKind.StaticKeyword))
-        {
             return;
-        }
 
         var containingClass = MeridianAnalyzerRuleHelpers.GetContainingClass(fieldDeclaration);
-        if (containingClass is null || !IsSensitiveRuntimeType(containingClass))
-        {
-            return;
-        }
+        if (containingClass is null || !IsSensitiveRuntimeType(containingClass)) return;
 
         var typeName = fieldDeclaration.Declaration.Type.ToString();
-        if (!MutableTypeNames.Any(name => typeName.Contains(name, StringComparison.Ordinal)))
-        {
-            return;
-        }
+        if (!MutableTypeNames.Any(name => typeName.Contains(name, StringComparison.Ordinal))) return;
 
         var variable = fieldDeclaration.Declaration.Variables.FirstOrDefault();
         context.ReportDiagnostic(Diagnostic.Create(Rule, (variable ?? (SyntaxNode)fieldDeclaration).GetLocation()));

@@ -12,7 +12,10 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
     public const string DiagnosticId = "MER0014";
 
     private static readonly LocalizableString Title = "Keep model ownership clear";
-    private static readonly LocalizableString MessageFormat = "Review this model placement against the package's DTO and entity ownership conventions";
+
+    private static readonly LocalizableString MessageFormat =
+        "Review this model placement against the package's DTO and entity ownership conventions";
+
     private static readonly LocalizableString Description =
         "HTTP DTOs should stay feature-local, persistence entities should stay in dedicated entity folders, and Core models should not carry EF persistence attributes.";
 
@@ -38,8 +41,8 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
         MessageFormat,
         MeridianDiagnosticCategories.Architecture,
         DiagnosticSeverity.Info,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -54,9 +57,7 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
     {
         if (context.Node is not ClassDeclarationSyntax classDeclaration ||
             MeridianAnalyzerRuleHelpers.IsTestPath(classDeclaration.SyntaxTree.FilePath))
-        {
             return;
-        }
 
         var filePath = classDeclaration.SyntaxTree.FilePath;
         var className = classDeclaration.Identifier.ValueText;
@@ -76,9 +77,7 @@ public sealed class MER0014KeepModelOwnershipBoundariesAnalyzer : DiagnosticAnal
 
         if (MeridianAnalyzerSyntaxHelpers.PathContains(filePath, "/Core/") &&
             HasPersistenceAttribute(classDeclaration))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.Identifier.GetLocation()));
-        }
     }
 
     private static bool IsHttpContractName(string className)

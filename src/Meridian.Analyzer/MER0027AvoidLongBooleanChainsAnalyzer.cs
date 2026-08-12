@@ -14,8 +14,10 @@ public sealed class MER0027AvoidLongBooleanChainsAnalyzer : DiagnosticAnalyzer
     private const int MinimumLogicalOperatorCount = 5;
 
     private static readonly LocalizableString Title = "Avoid overly long boolean condition chains";
+
     private static readonly LocalizableString MessageFormat =
         "Extract named predicates from this {0}-clause boolean chain";
+
     private static readonly LocalizableString Description =
         "Long `&&` and `||` chains are hard to review inline. " +
         "Extract named predicates or split the logic into clearer steps.";
@@ -26,8 +28,8 @@ public sealed class MER0027AvoidLongBooleanChainsAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -35,27 +37,20 @@ public sealed class MER0027AvoidLongBooleanChainsAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeLogicalExpression, SyntaxKind.LogicalAndExpression, SyntaxKind.LogicalOrExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeLogicalExpression, SyntaxKind.LogicalAndExpression,
+            SyntaxKind.LogicalOrExpression);
     }
 
     private static void AnalyzeLogicalExpression(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not BinaryExpressionSyntax logicalExpression)
-        {
-            return;
-        }
+        if (context.Node is not BinaryExpressionSyntax logicalExpression) return;
 
         if (logicalExpression.Parent is BinaryExpressionSyntax parent &&
             IsLogicalBinary(parent))
-        {
             return;
-        }
 
         var logicalOperatorCount = CountLogicalOperators(logicalExpression);
-        if (logicalOperatorCount < MinimumLogicalOperatorCount)
-        {
-            return;
-        }
+        if (logicalOperatorCount < MinimumLogicalOperatorCount) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, logicalExpression.GetLocation(), logicalOperatorCount + 1));
     }

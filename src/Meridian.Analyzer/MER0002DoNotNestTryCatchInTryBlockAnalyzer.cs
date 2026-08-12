@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -11,7 +12,10 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
     public const string DiagnosticId = "MER0002";
 
     private static readonly LocalizableString Title = "Do not hide fallback flow in broad nested try/catch blocks";
-    private static readonly LocalizableString MessageFormat = "Extract broad nested try/catch fallback flow from the surrounding try block";
+
+    private static readonly LocalizableString MessageFormat =
+        "Extract broad nested try/catch fallback flow from the surrounding try block";
+
     private static readonly LocalizableString Description =
         "Broad nested try/catch blocks inside another try block make degraded fallback paths harder to follow. " +
         "Extract the inner operation into a helper or flatten the exception handling.";
@@ -22,8 +26,8 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -31,30 +35,18 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeTryStatement, Microsoft.CodeAnalysis.CSharp.SyntaxKind.TryStatement);
+        context.RegisterSyntaxNodeAction(AnalyzeTryStatement, SyntaxKind.TryStatement);
     }
 
     private static void AnalyzeTryStatement(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not TryStatementSyntax tryStatement)
-        {
-            return;
-        }
+        if (context.Node is not TryStatementSyntax tryStatement) return;
 
-        if (tryStatement.Catches.Count == 0)
-        {
-            return;
-        }
+        if (tryStatement.Catches.Count == 0) return;
 
-        if (!IsNestedInsideAnotherTryBlock(tryStatement))
-        {
-            return;
-        }
+        if (!IsNestedInsideAnotherTryBlock(tryStatement)) return;
 
-        if (!HasBroadCatchThatContinuesControlFlow(tryStatement))
-        {
-            return;
-        }
+        if (!HasBroadCatchThatContinuesControlFlow(tryStatement)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, tryStatement.TryKeyword.GetLocation()));
     }
@@ -63,15 +55,9 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
     {
         foreach (var ancestor in tryStatement.Ancestors())
         {
-            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax)
-            {
-                return false;
-            }
+            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax) return false;
 
-            if (ancestor is TryStatementSyntax outerTry)
-            {
-                return outerTry.Block.DescendantNodes().Contains(tryStatement);
-            }
+            if (ancestor is TryStatementSyntax outerTry) return outerTry.Block.DescendantNodes().Contains(tryStatement);
         }
 
         return false;
@@ -81,20 +67,11 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
     {
         foreach (var catchClause in tryStatement.Catches)
         {
-            if (!IsBroadCatchClause(catchClause))
-            {
-                continue;
-            }
+            if (!IsBroadCatchClause(catchClause)) continue;
 
-            if (CatchTerminatesControlFlow(catchClause.Block))
-            {
-                continue;
-            }
+            if (CatchTerminatesControlFlow(catchClause.Block)) continue;
 
-            if (IsLogOnlyCatchBlock(catchClause.Block))
-            {
-                continue;
-            }
+            if (IsLogOnlyCatchBlock(catchClause.Block)) continue;
 
             return true;
         }
@@ -104,10 +81,7 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
 
     private static bool IsBroadCatchClause(CatchClauseSyntax catchClause)
     {
-        if (catchClause.Declaration is null)
-        {
-            return true;
-        }
+        if (catchClause.Declaration is null) return true;
 
         return catchClause.Declaration.Type switch
         {
@@ -146,9 +120,7 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
                     Expression: var invocationTarget
                 }
             })
-        {
             return false;
-        }
 
         return GetInvocationName(invocationTarget) is
             "Debug" or

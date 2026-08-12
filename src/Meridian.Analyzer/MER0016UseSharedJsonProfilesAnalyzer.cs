@@ -12,7 +12,10 @@ public sealed class MER0016UseSharedJsonProfilesAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0016";
 
     private static readonly LocalizableString Title = "Use shared Meridian JSON profiles";
-    private static readonly LocalizableString MessageFormat = "Move ad hoc JSON options into JsonProfiles or a named JSON options factory";
+
+    private static readonly LocalizableString MessageFormat =
+        "Move ad hoc JSON options into JsonProfiles or a named JSON options factory";
+
     private static readonly LocalizableString Description =
         "Ad hoc System.Text.Json option construction in runtime code creates serializer drift. Shared profiles should own the option shape unless a dedicated factory documents the exception.";
 
@@ -31,8 +34,8 @@ public sealed class MER0016UseSharedJsonProfilesAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Architecture,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -45,17 +48,13 @@ public sealed class MER0016UseSharedJsonProfilesAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeObjectCreation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ObjectCreationExpressionSyntax objectCreation || IsApprovedLocation(objectCreation))
-        {
-            return;
-        }
+        if (context.Node is not ObjectCreationExpressionSyntax objectCreation ||
+            IsApprovedLocation(objectCreation)) return;
 
         var typeName = objectCreation.Type.ToString();
         if (typeName.EndsWith("JsonSerializerOptions", StringComparison.Ordinal) ||
             typeName.EndsWith("JsonDocumentOptions", StringComparison.Ordinal))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, objectCreation.Type.GetLocation()));
-        }
     }
 
     private static bool IsApprovedLocation(SyntaxNode node)

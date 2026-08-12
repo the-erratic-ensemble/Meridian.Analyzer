@@ -12,8 +12,10 @@ public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0025";
 
     private static readonly LocalizableString Title = "Avoid empty is-pattern brace syntax";
+
     private static readonly LocalizableString MessageFormat =
         "Avoid empty brace pattern syntax in '{0}'; prefer Shared helpers or explicit null checks where applicable";
+
     private static readonly LocalizableString Description =
         "Empty property-pattern braces such as `is { }`, `is not { }`, and tuple elements like `({ }, { })` hide the shared helper and explicit null-check patterns used across the codebase.";
 
@@ -28,8 +30,8 @@ public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -45,9 +47,7 @@ public sealed class MER0025AvoidIsPatternBracesAnalyzer : DiagnosticAnalyzer
         if (context.Node is not IsPatternExpressionSyntax isPatternExpression ||
             IsExcludedLocation(isPatternExpression.SyntaxTree.FilePath) ||
             !ContainsEmptyBracePattern(isPatternExpression.Pattern))
-        {
             return;
-        }
 
         var patternText = NormalizePatternText(isPatternExpression.Pattern);
         context.ReportDiagnostic(Diagnostic.Create(Rule, isPatternExpression.Pattern.GetLocation(), patternText));

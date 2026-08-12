@@ -12,8 +12,10 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
     public const string DiagnosticId = "MER0031";
 
     private static readonly LocalizableString Title = "Avoid nested collection-trimming while loops";
+
     private static readonly LocalizableString MessageFormat =
         "Extract this nested collection-trimming while loop into a helper or bounded collection abstraction";
+
     private static readonly LocalizableString Description =
         "A nested while loop that exists only to trim a collection's count or length blends housekeeping logic into the enclosing loop's main work. " +
         "Extract the trimming loop into a named helper or use a bounded collection abstraction.";
@@ -24,8 +26,8 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     private static readonly HashSet<string> TrimMethodNames =
     [
@@ -50,25 +52,13 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
 
     private static void AnalyzeWhileStatement(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not WhileStatementSyntax whileStatement)
-        {
-            return;
-        }
+        if (context.Node is not WhileStatementSyntax whileStatement) return;
 
-        if (!IsNestedInsideAnotherWhileStatement(whileStatement))
-        {
-            return;
-        }
+        if (!IsNestedInsideAnotherWhileStatement(whileStatement)) return;
 
-        if (!TryGetTrackedCollectionExpression(whileStatement.Condition, out var collectionExpression))
-        {
-            return;
-        }
+        if (!TryGetTrackedCollectionExpression(whileStatement.Condition, out var collectionExpression)) return;
 
-        if (!BodyOnlyTrimsTrackedCollection(whileStatement.Statement, collectionExpression))
-        {
-            return;
-        }
+        if (!BodyOnlyTrimsTrackedCollection(whileStatement.Statement, collectionExpression)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, whileStatement.WhileKeyword.GetLocation()));
     }
@@ -77,15 +67,9 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
     {
         foreach (var ancestor in whileStatement.Ancestors())
         {
-            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax)
-            {
-                return false;
-            }
+            if (ancestor is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax) return false;
 
-            if (ancestor is WhileStatementSyntax)
-            {
-                return true;
-            }
+            if (ancestor is WhileStatementSyntax) return true;
         }
 
         return false;
@@ -162,23 +146,20 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
         ExpressionSyntax collectionExpression)
     {
         return statement is ExpressionStatementSyntax
+        {
+            Expression: InvocationExpressionSyntax
             {
-                Expression: InvocationExpressionSyntax
-                {
-                    Expression: MemberAccessExpressionSyntax memberAccess
-                } invocation
-            } &&
-            SyntaxFactory.AreEquivalent(Unwrap(memberAccess.Expression), collectionExpression) &&
-            TrimMethodNames.Contains(memberAccess.Name.Identifier.ValueText) &&
-            InvocationLooksLikeTrim(invocation);
+                Expression: MemberAccessExpressionSyntax memberAccess
+            } invocation
+        } &&
+               SyntaxFactory.AreEquivalent(Unwrap(memberAccess.Expression), collectionExpression) &&
+               TrimMethodNames.Contains(memberAccess.Name.Identifier.ValueText) &&
+               InvocationLooksLikeTrim(invocation);
     }
 
     private static bool InvocationLooksLikeTrim(InvocationExpressionSyntax invocation)
     {
-        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess)
-        {
-            return false;
-        }
+        if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return false;
 
         return memberAccess.Name.Identifier.ValueText switch
         {
@@ -191,9 +172,7 @@ public sealed class MER0031AvoidNestedCollectionTrimWhileLoopsAnalyzer : Diagnos
     private static ExpressionSyntax Unwrap(ExpressionSyntax expression)
     {
         while (expression is ParenthesizedExpressionSyntax parenthesizedExpression)
-        {
             expression = parenthesizedExpression.Expression;
-        }
 
         return expression;
     }

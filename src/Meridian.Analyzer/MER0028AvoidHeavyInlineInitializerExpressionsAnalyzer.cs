@@ -15,8 +15,10 @@ public sealed class MER0028AvoidHeavyInlineInitializerExpressionsAnalyzer : Diag
     private const int MinimumComplexityScore = 8;
 
     private static readonly LocalizableString Title = "Avoid heavy inline expressions in initializer members";
+
     private static readonly LocalizableString MessageFormat =
         "Move this {0}-line initializer member expression into named locals or a helper";
+
     private static readonly LocalizableString Description =
         "Large multi-line expressions inside object and anonymous-object initializer members hide business logic in construction code. " +
         "Stage the logic before the initializer or move it into a helper.";
@@ -27,8 +29,8 @@ public sealed class MER0028AvoidHeavyInlineInitializerExpressionsAnalyzer : Diag
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -44,9 +46,7 @@ public sealed class MER0028AvoidHeavyInlineInitializerExpressionsAnalyzer : Diag
     {
         if (context.Node is not AnonymousObjectMemberDeclaratorSyntax member ||
             member.Expression is null)
-        {
             return;
-        }
 
         AnalyzeInitializerExpression(context, member.Expression);
     }
@@ -56,31 +56,20 @@ public sealed class MER0028AvoidHeavyInlineInitializerExpressionsAnalyzer : Diag
         if (context.Node is not AssignmentExpressionSyntax assignment ||
             assignment.Parent is not InitializerExpressionSyntax initializer ||
             !initializer.IsKind(SyntaxKind.ObjectInitializerExpression))
-        {
             return;
-        }
 
         AnalyzeInitializerExpression(context, assignment.Right);
     }
 
     private static void AnalyzeInitializerExpression(SyntaxNodeAnalysisContext context, ExpressionSyntax expression)
     {
-        if (IsNestedObjectConstruction(expression))
-        {
-            return;
-        }
+        if (IsNestedObjectConstruction(expression)) return;
 
         var lineCount = GetLineCount(expression);
-        if (lineCount < MinimumLineSpan)
-        {
-            return;
-        }
+        if (lineCount < MinimumLineSpan) return;
 
         var complexityScore = GetComplexityScore(expression);
-        if (complexityScore < MinimumComplexityScore)
-        {
-            return;
-        }
+        if (complexityScore < MinimumComplexityScore) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, expression.GetLocation(), lineCount));
     }
@@ -108,6 +97,6 @@ public sealed class MER0028AvoidHeavyInlineInitializerExpressionsAnalyzer : Diag
                 binaryExpression.IsKind(SyntaxKind.LogicalAndExpression) ||
                 binaryExpression.IsKind(SyntaxKind.LogicalOrExpression));
 
-        return (conditionalCount * 3) + invocationCount + logicalOperatorCount;
+        return conditionalCount * 3 + invocationCount + logicalOperatorCount;
     }
 }

@@ -14,8 +14,10 @@ public sealed class MER0026AvoidNestedTernaryChainsAnalyzer : DiagnosticAnalyzer
     private const int MinimumConditionalChainLength = 3;
 
     private static readonly LocalizableString Title = "Avoid deeply nested ternary chains";
+
     private static readonly LocalizableString MessageFormat =
         "Extract this {0}-branch conditional chain into named steps";
+
     private static readonly LocalizableString Description =
         "Long nested conditional-expression chains bury decision trees in one expression. " +
         "Stage the classification or ranking steps in named locals or helpers.";
@@ -26,8 +28,8 @@ public sealed class MER0026AvoidNestedTernaryChainsAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -40,31 +42,19 @@ public sealed class MER0026AvoidNestedTernaryChainsAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeConditionalExpression(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ConditionalExpressionSyntax conditionalExpression)
-        {
-            return;
-        }
+        if (context.Node is not ConditionalExpressionSyntax conditionalExpression) return;
 
-        if (conditionalExpression.Parent is ConditionalExpressionSyntax)
-        {
-            return;
-        }
+        if (conditionalExpression.Parent is ConditionalExpressionSyntax) return;
 
         var conditionalCount = CountConditionalExpressions(conditionalExpression);
-        if (conditionalCount < MinimumConditionalChainLength)
-        {
-            return;
-        }
+        if (conditionalCount < MinimumConditionalChainLength) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, conditionalExpression.GetLocation(), conditionalCount));
     }
 
     private static int CountConditionalExpressions(ExpressionSyntax expression)
     {
-        if (expression is not ConditionalExpressionSyntax conditionalExpression)
-        {
-            return 0;
-        }
+        if (expression is not ConditionalExpressionSyntax conditionalExpression) return 0;
 
         return 1
                + CountConditionalExpressions(conditionalExpression.WhenTrue)

@@ -11,8 +11,12 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
 {
     public const string DiagnosticId = "MER0003";
 
-    private static readonly LocalizableString Title = "Do not cache tenant, entitlement, quota, or policy-sensitive endpoints";
-    private static readonly LocalizableString MessageFormat = "Remove [OutputCache] from endpoints with tenant, entitlement, quota, plan, or explicit policy metadata unless the cache policy is clearly safe";
+    private static readonly LocalizableString Title =
+        "Do not cache tenant, entitlement, quota, or policy-sensitive endpoints";
+
+    private static readonly LocalizableString MessageFormat =
+        "Remove [OutputCache] from endpoints with tenant, entitlement, quota, plan, or explicit policy metadata unless the cache policy is clearly safe";
+
     private static readonly LocalizableString Description =
         "Output-cache hits skip action execution and can bypass tenant, entitlement, quota, plan, or other sensitive checks. " +
         "Use no-store response caching or a cache policy that is clearly safe instead.";
@@ -32,8 +36,8 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
         MessageFormat,
         MeridianDiagnosticCategories.Security,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -47,66 +51,43 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
 
     private static void AnalyzeClassDeclaration(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ClassDeclarationSyntax classDeclaration)
-        {
-            return;
-        }
+        if (context.Node is not ClassDeclarationSyntax classDeclaration) return;
 
         var outputCacheAttribute = MeridianAnalyzerSyntaxHelpers
             .GetAttributes(classDeclaration, "OutputCache")
             .FirstOrDefault();
-        if (outputCacheAttribute is null)
-        {
-            return;
-        }
+        if (outputCacheAttribute is null) return;
 
         if (!HasSensitiveEndpointMetadata(classDeclaration) &&
             !classDeclaration.Members
                 .OfType<MethodDeclarationSyntax>()
                 .Any(HasSensitiveEndpointMetadata))
-        {
             return;
-        }
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, outputCacheAttribute.GetLocation()));
     }
 
     private static void AnalyzeMethodDeclaration(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not MethodDeclarationSyntax methodDeclaration)
-        {
-            return;
-        }
+        if (context.Node is not MethodDeclarationSyntax methodDeclaration) return;
 
-        if (methodDeclaration.Parent is not ClassDeclarationSyntax classDeclaration)
-        {
-            return;
-        }
+        if (methodDeclaration.Parent is not ClassDeclarationSyntax classDeclaration) return;
 
         var methodOutputCacheAttribute = MeridianAnalyzerSyntaxHelpers
             .GetAttributes(methodDeclaration, "OutputCache")
             .FirstOrDefault();
-        if (methodOutputCacheAttribute is null)
-        {
-            return;
-        }
+        if (methodOutputCacheAttribute is null) return;
 
         var methodHasSensitiveMetadata = HasSensitiveEndpointMetadata(methodDeclaration);
         var classHasSensitiveMetadata = HasSensitiveEndpointMetadata(classDeclaration);
-        if (!methodHasSensitiveMetadata && !classHasSensitiveMetadata)
-        {
-            return;
-        }
+        if (!methodHasSensitiveMetadata && !classHasSensitiveMetadata) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, methodOutputCacheAttribute.GetLocation()));
     }
 
     private static bool HasSensitiveEndpointMetadata(MemberDeclarationSyntax member)
     {
-        if (MeridianAnalyzerSyntaxHelpers.HasAttribute(member, SensitiveAttributeNames))
-        {
-            return true;
-        }
+        if (MeridianAnalyzerSyntaxHelpers.HasAttribute(member, SensitiveAttributeNames)) return true;
 
         return MeridianAnalyzerSyntaxHelpers
             .GetAttributes(member, "Authorize")
@@ -118,6 +99,6 @@ public sealed class MER0003DoNotCombineOutputCacheWithSensitiveEndpointMetadataA
         return authorizeAttribute.ArgumentList?.Arguments.Any(argument =>
             argument.NameEquals?.Name.Identifier.ValueText == "Policy" ||
             argument.NameColon?.Name.Identifier.ValueText == "Policy" ||
-            argument.NameEquals is null && argument.NameColon is null) == true;
+            (argument.NameEquals is null && argument.NameColon is null)) == true;
     }
 }

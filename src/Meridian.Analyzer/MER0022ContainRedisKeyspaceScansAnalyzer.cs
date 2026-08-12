@@ -15,7 +15,10 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
     private const string RedisServerTypeNamespace = "StackExchange.Redis";
 
     private static readonly LocalizableString Title = "Contain Redis keyspace scans";
-    private static readonly LocalizableString MessageFormat = "Route Redis keyspace scans through a dedicated bounded helper";
+
+    private static readonly LocalizableString MessageFormat =
+        "Route Redis keyspace scans through a dedicated bounded helper";
+
     private static readonly LocalizableString Description =
         "Direct IServer.Keys scans are operationally expensive and easy to duplicate. Runtime code should use a single bounded helper with cancellation, batching, and logging policy.";
 
@@ -25,8 +28,8 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
         MessageFormat,
         MeridianDiagnosticCategories.Performance,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -41,17 +44,13 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
     {
         if (context.Node is not InvocationExpressionSyntax invocation ||
             MeridianAnalyzerRuleHelpers.IsTestPath(invocation.SyntaxTree.FilePath))
-        {
             return;
-        }
 
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
             string.Equals(memberAccess.Name.Identifier.ValueText, "Keys", StringComparison.Ordinal) &&
             !IsApprovedKeyspaceBoundary(invocation) &&
             IsRedisKeysInvocation(context, invocation, memberAccess))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
     }
 
     private static bool IsApprovedKeyspaceBoundary(SyntaxNode node)
@@ -71,11 +70,10 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
         var receiverType = context.SemanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
         if (IsRedisServerType(receiverType) ||
             receiverType?.AllInterfaces.Any(IsRedisServerType) == true)
-        {
             return true;
-        }
 
-        return context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is IMethodSymbol methodSymbol &&
+        return context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is IMethodSymbol
+                   methodSymbol &&
                IsRedisServerType(methodSymbol.ContainingType);
     }
 
@@ -83,6 +81,7 @@ public sealed class MER0022ContainRedisKeyspaceScansAnalyzer : DiagnosticAnalyze
     {
         return typeSymbol is INamedTypeSymbol namedType &&
                string.Equals(namedType.Name, RedisServerTypeName, StringComparison.Ordinal) &&
-               string.Equals(namedType.ContainingNamespace.ToDisplayString(), RedisServerTypeNamespace, StringComparison.Ordinal);
+               string.Equals(namedType.ContainingNamespace.ToDisplayString(), RedisServerTypeNamespace,
+                   StringComparison.Ordinal);
     }
 }

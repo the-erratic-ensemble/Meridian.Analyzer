@@ -12,7 +12,10 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
     public const string DiagnosticId = "MER0018";
 
     private static readonly LocalizableString Title = "Contain raw SQL APIs";
-    private static readonly LocalizableString MessageFormat = "Keep raw SQL in persistence code and prefer interpolated APIs over raw SQL string construction";
+
+    private static readonly LocalizableString MessageFormat =
+        "Keep raw SQL in persistence code and prefer interpolated APIs over raw SQL string construction";
+
     private static readonly LocalizableString Description =
         "Raw SQL in request or runtime code is high-risk. SQL should live in repositories, migrations, CLI schema tools, or another named persistence path.";
 
@@ -47,8 +50,8 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Security,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -63,9 +66,7 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
     {
         if (context.Node is not InvocationExpressionSyntax invocation ||
             MeridianAnalyzerRuleHelpers.IsTestPath(invocation.SyntaxTree.FilePath))
-        {
             return;
-        }
 
         var invocationName = MeridianAnalyzerRuleHelpers.GetSimpleInvocationName(invocation);
         if (RawSqlMethodNames.Any(name => string.Equals(invocationName, name, StringComparison.Ordinal)))
@@ -76,9 +77,7 @@ public sealed class MER0018ContainRawSqlAnalyzer : DiagnosticAnalyzer
 
         if (InterpolatedSqlMethodNames.Any(name => string.Equals(invocationName, name, StringComparison.Ordinal)) &&
             !IsApprovedSqlBoundary(invocation.SyntaxTree.FilePath))
-        {
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
     }
 
     private static bool IsApprovedSqlBoundary(string filePath)

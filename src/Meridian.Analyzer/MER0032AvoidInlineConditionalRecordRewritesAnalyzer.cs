@@ -16,8 +16,10 @@ public sealed class MER0032AvoidInlineConditionalRecordRewritesAnalyzer : Diagno
     private const int MinimumLineSpan = 4;
 
     private static readonly LocalizableString Title = "Avoid inline conditional record rewrites";
+
     private static readonly LocalizableString MessageFormat =
         "Extract this conditional record rewrite into a named helper";
+
     private static readonly LocalizableString Description =
         "Conditional LINQ projections that clone a record across multiple lines hide update rules inside one expression. " +
         "Move the rewrite into a named helper or stage the member changes first.";
@@ -28,8 +30,8 @@ public sealed class MER0032AvoidInlineConditionalRecordRewritesAnalyzer : Diagno
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -42,20 +44,11 @@ public sealed class MER0032AvoidInlineConditionalRecordRewritesAnalyzer : Diagno
 
     private static void AnalyzeConditionalExpression(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not ConditionalExpressionSyntax conditionalExpression)
-        {
-            return;
-        }
+        if (context.Node is not ConditionalExpressionSyntax conditionalExpression) return;
 
-        if (!IsSelectLambdaBody(conditionalExpression))
-        {
-            return;
-        }
+        if (!IsSelectLambdaBody(conditionalExpression)) return;
 
-        if (!IsReportableConditionalRecordRewrite(conditionalExpression))
-        {
-            return;
-        }
+        if (!IsReportableConditionalRecordRewrite(conditionalExpression)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, conditionalExpression.GetLocation()));
     }
@@ -64,25 +57,21 @@ public sealed class MER0032AvoidInlineConditionalRecordRewritesAnalyzer : Diagno
     {
         if (TryGetReportedWithExpression(conditionalExpression, out var withExpression) &&
             IsReportableWithExpression(withExpression))
-        {
             return true;
-        }
 
         return CountWithBranches(conditionalExpression) >= MinimumWithBranchCount;
     }
 
     private static bool IsSelectLambdaBody(ConditionalExpressionSyntax conditionalExpression)
     {
-        if (conditionalExpression.Parent is not SimpleLambdaExpressionSyntax and not ParenthesizedLambdaExpressionSyntax)
-        {
-            return false;
-        }
+        if (conditionalExpression.Parent is not SimpleLambdaExpressionSyntax
+            and not ParenthesizedLambdaExpressionSyntax) return false;
 
         return conditionalExpression
-            .Ancestors()
-            .OfType<InvocationExpressionSyntax>()
-            .FirstOrDefault() is { } invocation &&
-            IsNamedInvocation(invocation, "Select");
+                   .Ancestors()
+                   .OfType<InvocationExpressionSyntax>()
+                   .FirstOrDefault() is { } invocation &&
+               IsNamedInvocation(invocation, "Select");
     }
 
     private static bool TryGetReportedWithExpression(

@@ -15,8 +15,10 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
     private const int MinimumNestedQueryCallCount = 2;
 
     private static readonly LocalizableString Title = "Avoid heavy inline query lambdas";
+
     private static readonly LocalizableString MessageFormat =
         "Move this {0}-line query lambda into a named query step or helper";
+
     private static readonly LocalizableString Description =
         "Multi-line LINQ lambdas that contain nested query pipelines or statement-body value construction hide branching, filtering, and shaping inside a fluent call. " +
         "Move the nested query work into a named step or helper.";
@@ -27,8 +29,8 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
         MessageFormat,
         MeridianDiagnosticCategories.Readability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -42,31 +44,16 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
 
     private static void AnalyzeLambda(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not LambdaExpressionSyntax lambda)
-        {
-            return;
-        }
+        if (context.Node is not LambdaExpressionSyntax lambda) return;
 
-        if (!TryGetContainingQueryInvocation(context, lambda, out _))
-        {
-            return;
-        }
+        if (!TryGetContainingQueryInvocation(context, lambda, out _)) return;
 
         var lineCount = GetLineCount(lambda);
-        if (lineCount < MinimumLineSpan)
-        {
-            return;
-        }
+        if (lineCount < MinimumLineSpan) return;
 
-        if (HasReportedQueryLambdaAncestor(context, lambda))
-        {
-            return;
-        }
+        if (HasReportedQueryLambdaAncestor(context, lambda)) return;
 
-        if (!IsHeavyQueryLambda(context, lambda))
-        {
-            return;
-        }
+        if (!IsHeavyQueryLambda(context, lambda)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, lambda.GetLocation(), lineCount));
     }
@@ -75,16 +62,11 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
     {
         foreach (var ancestorLambda in lambda.Ancestors().OfType<LambdaExpressionSyntax>())
         {
-            if (!TryGetContainingQueryInvocation(context, ancestorLambda, out _))
-            {
-                continue;
-            }
+            if (!TryGetContainingQueryInvocation(context, ancestorLambda, out _)) continue;
 
             if (GetLineCount(ancestorLambda) >= MinimumLineSpan &&
                 IsHeavyQueryLambda(context, ancestorLambda))
-            {
                 return true;
-            }
         }
 
         return false;
@@ -104,13 +86,14 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
     {
         var hasLocalDeclaration = block.Statements.Any(statement => statement is LocalDeclarationStatementSyntax);
         var hasValueReturn = block.Statements.Any(statement =>
-            statement is ReturnStatementSyntax {
+            statement is ReturnStatementSyntax
+            {
                 Expression: ObjectCreationExpressionSyntax
-                    or ImplicitObjectCreationExpressionSyntax
-                    or AnonymousObjectCreationExpressionSyntax
-                    or InvocationExpressionSyntax
-                    or TupleExpressionSyntax
-                    or WithExpressionSyntax
+                or ImplicitObjectCreationExpressionSyntax
+                or AnonymousObjectCreationExpressionSyntax
+                or InvocationExpressionSyntax
+                or TupleExpressionSyntax
+                or WithExpressionSyntax
             });
 
         return hasLocalDeclaration && hasValueReturn;
@@ -120,21 +103,13 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
     {
         foreach (var invocation in expression.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>())
         {
-            if (!IsQueryOperatorInvocation(context, invocation))
-            {
-                continue;
-            }
+            if (!IsQueryOperatorInvocation(context, invocation)) continue;
 
             if (TryGetParentChainedInvocation(invocation, out var parentInvocation) &&
                 IsQueryOperatorInvocation(context, parentInvocation))
-            {
                 continue;
-            }
 
-            if (CountQueryOperatorChain(context, invocation) >= MinimumNestedQueryCallCount)
-            {
-                return true;
-            }
+            if (CountQueryOperatorChain(context, invocation) >= MinimumNestedQueryCallCount) return true;
         }
 
         return false;
@@ -143,7 +118,7 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
     private static int CountQueryOperatorChain(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
     {
         var count = 0;
-        InvocationExpressionSyntax? current = invocation;
+        var current = invocation;
 
         while (current is not null && IsQueryOperatorInvocation(context, current))
         {
@@ -165,21 +140,18 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
             argument.Parent is not ArgumentListSyntax argumentList ||
             argumentList.Parent is not InvocationExpressionSyntax candidateInvocation ||
             !IsQueryOperatorInvocation(context, candidateInvocation))
-        {
             return false;
-        }
 
         invocation = candidateInvocation;
         return true;
     }
 
-    private static bool IsQueryOperatorInvocation(SyntaxNodeAnalysisContext context, InvocationExpressionSyntax invocation)
+    private static bool IsQueryOperatorInvocation(SyntaxNodeAnalysisContext context,
+        InvocationExpressionSyntax invocation)
     {
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess ||
             !IsQueryOperatorName(memberAccess.Name.Identifier.ValueText))
-        {
             return false;
-        }
 
         var receiverType = context.SemanticModel.GetTypeInfo(memberAccess.Expression, context.CancellationToken).Type;
         var invocationTypeInfo = context.SemanticModel.GetTypeInfo(invocation, context.CancellationToken);
@@ -210,9 +182,7 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
 
         if (invocation.Parent is not MemberAccessExpressionSyntax memberAccess ||
             memberAccess.Parent is not InvocationExpressionSyntax parent)
-        {
             return false;
-        }
 
         parentInvocation = parent;
         return true;
@@ -220,7 +190,10 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
 
     private static InvocationExpressionSyntax? GetReceiverInvocation(InvocationExpressionSyntax invocation)
     {
-        return invocation.Expression is MemberAccessExpressionSyntax { Expression: InvocationExpressionSyntax receiverInvocation }
+        return invocation.Expression is MemberAccessExpressionSyntax
+        {
+            Expression: InvocationExpressionSyntax receiverInvocation
+        }
             ? receiverInvocation
             : null;
     }
@@ -233,25 +206,16 @@ public sealed class MER0033AvoidHeavyInlineQueryLambdasAnalyzer : DiagnosticAnal
 
     private static bool IsQueryLikeType(ITypeSymbol? typeSymbol)
     {
-        if (typeSymbol is null || typeSymbol.SpecialType == SpecialType.System_String)
-        {
-            return false;
-        }
+        if (typeSymbol is null || typeSymbol.SpecialType == SpecialType.System_String) return false;
 
-        if (MatchesQueryLikeType(typeSymbol))
-        {
-            return true;
-        }
+        if (MatchesQueryLikeType(typeSymbol)) return true;
 
         return typeSymbol.AllInterfaces.Any(MatchesQueryLikeType);
     }
 
     private static bool MatchesQueryLikeType(ITypeSymbol typeSymbol)
     {
-        if (typeSymbol is not INamedTypeSymbol namedType)
-        {
-            return false;
-        }
+        if (typeSymbol is not INamedTypeSymbol namedType) return false;
 
         var namespaceName = namedType.ContainingNamespace?.ToDisplayString();
         return (namespaceName, namedType.MetadataName) switch

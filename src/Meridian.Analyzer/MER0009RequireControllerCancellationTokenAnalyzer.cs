@@ -12,7 +12,10 @@ public sealed class MER0009RequireControllerCancellationTokenAnalyzer : Diagnost
     public const string DiagnosticId = "MER0009";
 
     private static readonly LocalizableString Title = "Expose cancellation in async controller actions";
-    private static readonly LocalizableString MessageFormat = "Async controller actions should accept a CancellationToken and avoid CancellationToken.None in request-scoped code";
+
+    private static readonly LocalizableString MessageFormat =
+        "Async controller actions should accept a CancellationToken and avoid CancellationToken.None in request-scoped code";
+
     private static readonly LocalizableString Description =
         "Controller actions are request boundaries. Async actions should expose request cancellation and should not intentionally detach work from the request token.";
 
@@ -22,8 +25,8 @@ public sealed class MER0009RequireControllerCancellationTokenAnalyzer : Diagnost
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -40,14 +43,9 @@ public sealed class MER0009RequireControllerCancellationTokenAnalyzer : Diagnost
         if (context.Node is not MethodDeclarationSyntax methodDeclaration ||
             !MeridianAnalyzerRuleHelpers.IsControllerAction(methodDeclaration) ||
             !MeridianAnalyzerRuleHelpers.IsAsyncLike(methodDeclaration))
-        {
             return;
-        }
 
-        if (MeridianAnalyzerRuleHelpers.HasCancellationTokenParameter(methodDeclaration))
-        {
-            return;
-        }
+        if (MeridianAnalyzerRuleHelpers.HasCancellationTokenParameter(methodDeclaration)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, methodDeclaration.Identifier.GetLocation()));
     }
@@ -56,15 +54,10 @@ public sealed class MER0009RequireControllerCancellationTokenAnalyzer : Diagnost
     {
         if (context.Node is not MemberAccessExpressionSyntax memberAccess ||
             !MeridianAnalyzerRuleHelpers.IsMemberAccessNamed(memberAccess, "CancellationToken", "None"))
-        {
             return;
-        }
 
         var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(memberAccess);
-        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod))
-        {
-            return;
-        }
+        if (containingMethod is null || !MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, memberAccess.GetLocation()));
     }
