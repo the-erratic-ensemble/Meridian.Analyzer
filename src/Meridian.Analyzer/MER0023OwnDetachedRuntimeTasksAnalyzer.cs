@@ -11,19 +11,13 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "MER0023";
 
-    private static readonly LocalizableString Title = "Own detached runtime tasks and cancellation";
-    private static readonly LocalizableString MessageFormat = "Runtime background work should have an explicit lifetime, cancellation path, and observability path";
-    private static readonly LocalizableString Description =
-        "Detached Task.Run, fire-and-forget async calls, and broad CancellationToken.None usage hide failures, shutdown behavior, and request cancellation semantics.";
+    private static readonly LocalizableString Title = "Own detached runtime tasks";
 
-    private static readonly string[] ApprovedPathSegments =
-    {
-        "/Migrations/",
-        "/Cli/",
-        "/Meridian.Analyzer/",
-        "/tools/",
-        "/Tools/"
-    };
+    private static readonly LocalizableString MessageFormat =
+        "Observe this task through await, return, Task.WhenAll, or an IBackgroundTaskOwner";
+
+    private static readonly LocalizableString Description =
+        "Discarded task-returning calls and unobserved Task.Run work can hide failures and outlive their intended runtime boundary.";
 
     internal static readonly DiagnosticDescriptor Rule = new(
         DiagnosticId,
@@ -31,8 +25,8 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
         MessageFormat,
         MeridianDiagnosticCategories.Reliability,
         DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: Description);
+        true,
+        Description);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
@@ -42,82 +36,183 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSyntaxNodeAction(AnalyzeInvocation, SyntaxKind.InvocationExpression);
         context.RegisterSyntaxNodeAction(AnalyzeAssignment, SyntaxKind.SimpleAssignmentExpression);
-        context.RegisterSyntaxNodeAction(AnalyzeMemberAccess, SyntaxKind.SimpleMemberAccessExpression);
     }
 
     private static void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not InvocationExpressionSyntax invocation || IsApprovedLocation(invocation))
-        {
+        if (context.Node is not InvocationExpressionSyntax invocation ||
+            IsExcludedLocation(invocation) ||
+            !IsTaskRun(invocation, context.SemanticModel, context.CancellationToken) ||
+            IsTaskObserved(invocation, context.SemanticModel, context.CancellationToken))
             return;
-        }
 
-        if (IsTaskRun(invocation))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
-        }
+        context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
     }
 
     private static void AnalyzeAssignment(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not AssignmentExpressionSyntax assignment || IsApprovedLocation(assignment))
-        {
-            return;
-        }
-
-        if (assignment.Left is not IdentifierNameSyntax identifierName ||
+        if (context.Node is not AssignmentExpressionSyntax assignment ||
+            IsExcludedLocation(assignment) ||
+            assignment.Left is not IdentifierNameSyntax identifierName ||
             identifierName.Identifier.ValueText != "_" ||
             assignment.Right is not InvocationExpressionSyntax invocation ||
-            IsTaskRun(invocation) ||
-            !MeridianAnalyzerRuleHelpers.GetSimpleInvocationName(invocation).EndsWith("Async", StringComparison.Ordinal))
-        {
+            IsTaskRun(invocation, context.SemanticModel, context.CancellationToken) ||
+            !ReturnsTaskLike(invocation, context.SemanticModel, context.CancellationToken))
             return;
-        }
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, assignment.GetLocation()));
     }
 
-    private static void AnalyzeMemberAccess(SyntaxNodeAnalysisContext context)
+    private static bool IsTaskObserved(
+        InvocationExpressionSyntax taskRun,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
     {
-        if (context.Node is not MemberAccessExpressionSyntax memberAccess || IsApprovedLocation(memberAccess))
+        foreach (var ancestor in taskRun.Ancestors())
         {
-            return;
+            switch (ancestor)
+            {
+                case AwaitExpressionSyntax:
+                case ReturnStatementSyntax:
+                    return true;
+                case ArrowExpressionClauseSyntax arrowExpressionClause
+                    when arrowExpressionClause.Parent is MethodDeclarationSyntax or LocalFunctionStatementSyntax:
+                    return true;
+                case InvocationExpressionSyntax invocation
+                    when IsTaskAggregation(invocation, semanticModel, cancellationToken) ||
+                         IsBackgroundTaskOwnerInvocation(invocation, semanticModel, cancellationToken):
+                    return true;
+                case VariableDeclaratorSyntax variableDeclarator:
+                    return IsDeclaredTaskObserved(
+                        variableDeclarator,
+                        semanticModel,
+                        cancellationToken);
+                case AssignmentExpressionSyntax assignment:
+                    return IsAssignedTaskObserved(
+                        assignment,
+                        semanticModel,
+                        cancellationToken);
+            }
         }
 
-        if (!MeridianAnalyzerRuleHelpers.IsMemberAccessNamed(memberAccess, "CancellationToken", "None"))
-        {
-            return;
-        }
-
-        var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(memberAccess);
-        if (containingMethod is not null && MeridianAnalyzerRuleHelpers.IsControllerAction(containingMethod))
-        {
-            return;
-        }
-
-        context.ReportDiagnostic(Diagnostic.Create(Rule, memberAccess.GetLocation()));
+        return false;
     }
 
-    private static bool IsTaskRun(InvocationExpressionSyntax invocation)
+    private static bool IsDeclaredTaskObserved(
+        VariableDeclaratorSyntax declaration,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
     {
-        return invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-               memberAccess.Expression.ToString() is "Task" or "System.Threading.Tasks.Task" &&
-               memberAccess.Name.Identifier.ValueText == "Run";
+        var localSymbol = semanticModel.GetDeclaredSymbol(declaration, cancellationToken);
+        var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(declaration);
+        if (localSymbol is null || containingMethod is null) return false;
+
+        return containingMethod.DescendantNodes()
+            .OfType<IdentifierNameSyntax>()
+            .Where(identifier => identifier.SpanStart > declaration.SpanStart)
+            .Any(identifier =>
+                SymbolEqualityComparer.Default.Equals(
+                    semanticModel.GetSymbolInfo(identifier, cancellationToken).Symbol,
+                    localSymbol) &&
+                IsTaskReferenceObserved(identifier, semanticModel, cancellationToken));
     }
 
-    private static bool IsApprovedLocation(SyntaxNode node)
+    private static bool IsAssignedTaskObserved(
+        AssignmentExpressionSyntax assignment,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
     {
-        var filePath = node.SyntaxTree.FilePath;
-        if (MeridianAnalyzerRuleHelpers.IsTestPath(filePath) ||
-            MeridianAnalyzerSyntaxHelpers.PathContainsAny(filePath, ApprovedPathSegments))
+        if (assignment.Left is not IdentifierNameSyntax identifierName ||
+            identifierName.Identifier.ValueText == "_")
+            return false;
+
+        var assignedSymbol = semanticModel.GetSymbolInfo(identifierName, cancellationToken).Symbol;
+        var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(assignment);
+        if (assignedSymbol is not ILocalSymbol || containingMethod is null) return false;
+
+        return containingMethod.DescendantNodes()
+            .OfType<IdentifierNameSyntax>()
+            .Where(identifier => identifier.SpanStart > assignment.SpanStart)
+            .Any(identifier =>
+                SymbolEqualityComparer.Default.Equals(
+                    semanticModel.GetSymbolInfo(identifier, cancellationToken).Symbol,
+                    assignedSymbol) &&
+                IsTaskReferenceObserved(identifier, semanticModel, cancellationToken));
+    }
+
+    private static bool IsTaskReferenceObserved(
+        IdentifierNameSyntax identifier,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        foreach (var ancestor in identifier.Ancestors())
         {
-            return true;
+            switch (ancestor)
+            {
+                case AwaitExpressionSyntax:
+                case ReturnStatementSyntax:
+                    return true;
+                case InvocationExpressionSyntax invocation
+                    when IsTaskAggregation(invocation, semanticModel, cancellationToken) ||
+                         IsBackgroundTaskOwnerInvocation(invocation, semanticModel, cancellationToken):
+                    return true;
+                case StatementSyntax:
+                    return false;
+            }
         }
 
-        var containingMethod = MeridianAnalyzerRuleHelpers.GetContainingMethod(node);
-        var containingClass = MeridianAnalyzerRuleHelpers.GetContainingClass(node);
-        return containingMethod?.Identifier.ValueText == "ExecuteAsync" &&
-               containingClass is not null &&
-               MeridianAnalyzerSyntaxHelpers.InheritsFrom(containingClass, "BackgroundService");
+        return false;
+    }
+
+    private static bool IsTaskRun(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var method = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
+        return method?.Name == "Run" &&
+               method.ContainingType.Name == "Task" &&
+               method.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
+    }
+
+    private static bool IsTaskAggregation(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var method = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
+        return method?.Name is "WhenAll" or "WhenAny" &&
+               method.ContainingType.Name == "Task" &&
+               method.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
+    }
+
+    private static bool IsBackgroundTaskOwnerInvocation(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var method = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
+        var containingType = method?.ContainingType;
+        return containingType?.Name == "IBackgroundTaskOwner" ||
+               containingType?.AllInterfaces.Any(
+                   implementedInterface => implementedInterface.Name == "IBackgroundTaskOwner") == true;
+    }
+
+    private static bool ReturnsTaskLike(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var type = semanticModel.GetTypeInfo(invocation, cancellationToken).Type as INamedTypeSymbol;
+        if (type is null ||
+            type.ContainingNamespace.ToDisplayString() != "System.Threading.Tasks")
+            return false;
+
+        return type.Name is "Task" or "ValueTask";
+    }
+
+    private static bool IsExcludedLocation(SyntaxNode node)
+    {
+        return MeridianAnalyzerRuleHelpers.IsTestPath(node.SyntaxTree.FilePath);
     }
 }
