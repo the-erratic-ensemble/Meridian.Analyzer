@@ -6,12 +6,10 @@ Security fixes are applied on the current `main` branch and then shipped through
 
 ## Reporting A Vulnerability
 
-Do not open a public GitHub issue for a security-sensitive report.
+Available private-reporting paths:
 
-Use one of these paths instead:
-
-1. Open a private GitHub security advisory or private vulnerability report for this repository if that feature is enabled.
-2. If private reporting is unavailable, contact the repository owner directly through GitHub at `@myinusa` and include:
+1. Use a private GitHub security advisory or private vulnerability report for this repository when that feature is enabled.
+2. When private reporting is unavailable, contact the repository owner directly through GitHub at `@myinusa` and include:
    - the affected package version
    - a minimal reproduction
    - impact and expected fix window if known

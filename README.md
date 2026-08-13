@@ -1,6 +1,6 @@
 # Meridian.Analyzer
 
-`Meridian.Analyzer` is a Roslyn analyzer package for ASP.NET Core codebases with opinionated readability, architecture, security, reliability, and performance rules.
+`Meridian.Analyzer` is a Roslyn analyzer package for ASP.NET Core codebases with readability, architecture, security, reliability, and performance rules.
 
 ## Quick Start
 
@@ -42,7 +42,7 @@ Or add an explicit package reference:
 ## Local Checks
 
 - Local test run: `dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release`
-- Local package smoke check: `dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts`
+- Local package build: `dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifacts`
 
 Run these from this repo before publishing or sending a change for review.
 
@@ -61,7 +61,7 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 ## Notes
 
 - `nuget.org` is a public feed.
-- Some rules encode opinionated architectural conventions. Review the rule docs before enabling large sets as build warnings in an existing codebase.
+- Review each rule's architectural assumptions before enabling large sets as build warnings in an existing codebase.
 
 ## Current Rules
 
@@ -69,13 +69,13 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | --- | --- | --- | --- |
 | [Ternary in initializer payload branches](docs/rules/MER0001.md) | `MER0001` | Readability | Stage the payload branch in a named local or helper before building the initializer |
 | [Broad nested try/catch fallback flow](docs/rules/MER0002.md) | `MER0002` | Readability | Extract the inner fallback branch into a helper or flatten the exception-handling flow |
-| [Unsafe output-cache usage](docs/rules/MER0003.md) | `MER0003` | Security | Remove `[OutputCache]` or replace it with no-store caching unless you have a clearly safe cache policy |
+| [Unsafe output-cache usage](docs/rules/MER0003.md) | `MER0003` | Security | Use no-store caching for sensitive endpoints; apply `[OutputCache]` only with a policy safe for every caller |
 | [Missing explicit controller policy](docs/rules/MER0004.md) | `MER0004` | Security | Declare class-level or action-level policies on admin and high-risk controllers |
 | [Admin controller shape mismatch](docs/rules/MER0005.md) | `MER0005` | Security | Align admin controllers on `Admin*Controller`, `api/admin`, and `AdminControllerBase` |
-| [Controller service location](docs/rules/MER0006.md) | `MER0006` | Architecture | Use constructor injection or `[FromServices]` instead of action-body service location |
+| [Controller service location](docs/rules/MER0006.md) | `MER0006` | Architecture | Use constructor injection or `[FromServices]` for action dependencies |
 | [Raw configuration reads](docs/rules/MER0007.md) | `MER0007` | Reliability | Move raw reads to typed options, startup guards, or provider adapters |
 | [Startup bypass flag containment](docs/rules/MER0008.md) | `MER0008` | Security | Move `MERIDIAN_SKIP_*` reads behind `StartupGuards` or typed startup-skip options |
-| [Missing controller cancellation token](docs/rules/MER0009.md) | `MER0009` | Reliability | Add `CancellationToken` to async actions and avoid `CancellationToken.None` in request code |
+| [Missing controller cancellation token](docs/rules/MER0009.md) | `MER0009` | Reliability | Add `CancellationToken` to async actions and forward request cancellation |
 | [Direct time and delay APIs](docs/rules/MER0010.md) | `MER0010` | Reliability | Use a clock abstraction or `TimeProvider` for runtime time or delay work |
 | [Static mutable runtime state](docs/rules/MER0011.md) | `MER0011` | Reliability | Move static mutable state from controllers or handlers into injectable bounded services |
 | [Health-check registration parity](docs/rules/MER0012.md) | `MER0012` | Reliability | Register every source `Microsoft.Extensions.Diagnostics.HealthChecks.IHealthCheck` through health-check registration |
@@ -118,10 +118,10 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 
 ## Rule-Addition Checklist
 
-Before landing `MER0002+` or any later rule, update these surfaces in the same change:
+For every new or materially changed rule, update these surfaces in the same change:
 
 1. Analyzer implementation under `src/Meridian.Analyzer/`
-2. Positive and negative tests under `tests/Meridian.Analyzer.Tests/`
+2. Reporting and non-reporting tests under `tests/Meridian.Analyzer.Tests/`
 3. Rule documentation under `docs/rules/`
 4. The rule index in this `README.md`
 5. `docs/guide.md` or `docs/usage-example.md` when the docs or maintainer flow changed

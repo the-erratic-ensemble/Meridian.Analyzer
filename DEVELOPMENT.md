@@ -12,7 +12,7 @@ dotnet restore Meridian.Analyzer.slnx
 ## Normal Edit Loop
 
 - Change analyzer code, tests, or docs.
-- Run the local checks that matter:
+- Run the local checks:
 
 ```bash
 dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
