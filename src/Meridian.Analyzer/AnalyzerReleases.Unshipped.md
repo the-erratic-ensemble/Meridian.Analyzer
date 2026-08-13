@@ -33,7 +33,7 @@ MER0025 | Meridian.Readability | Warning | Avoid empty property-pattern braces s
 MER0026 | Meridian.Readability | Warning | Avoid deeply nested ternary chains by extracting named classification steps.
 MER0027 | Meridian.Readability | Warning | Extract named predicates from overly long chained boolean expressions.
 MER0028 | Meridian.Readability | Warning | Move heavy multi-line initializer-member expressions into named locals or helpers.
-MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with seven or more chained query calls.
+MER0029 | Meridian.Readability | Warning | Review LINQ and EF fluent chains with eight or more chained query calls.
 MER0030 | Meridian.Readability | Warning | Extract broad per-iteration try/catch blocks from nested while-loop and outer try control flow.
 MER0031 | Meridian.Readability | Warning | Extract nested collection-trimming while loops into named helpers or bounded collection abstractions.
 MER0032 | Meridian.Readability | Warning | Extract conditional LINQ projections that clone a record and rewrite multiple or nested members inline.
