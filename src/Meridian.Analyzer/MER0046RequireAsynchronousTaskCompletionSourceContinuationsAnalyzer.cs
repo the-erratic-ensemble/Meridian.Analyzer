@@ -91,16 +91,28 @@ public sealed class MER0046RequireAsynchronousTaskCompletionSourceContinuationsA
             TryGetRunContinuationsValue(context, expression, out var flag))
             return (constant & flag) == flag;
 
-        return expression.DescendantNodesAndSelf()
-            .OfType<MemberAccessExpressionSyntax>()
-            .Any(memberAccess =>
-            {
-                var symbol = context.SemanticModel.GetSymbolInfo(
-                    memberAccess,
-                    context.CancellationToken).Symbol;
-                return symbol is IFieldSymbol field &&
-                       IsRunContinuationsField(field);
-            });
+        return ContainsGuaranteedRunContinuationsOption(context, expression);
+    }
+
+    private static bool ContainsGuaranteedRunContinuationsOption(
+        SyntaxNodeAnalysisContext context,
+        ExpressionSyntax expression)
+    {
+        if (expression is ParenthesizedExpressionSyntax parenthesized)
+            return ContainsGuaranteedRunContinuationsOption(context, parenthesized.Expression);
+
+        if (expression is CastExpressionSyntax cast)
+            return ContainsGuaranteedRunContinuationsOption(context, cast.Expression);
+
+        if (expression is BinaryExpressionSyntax binary &&
+            binary.IsKind(SyntaxKind.BitwiseOrExpression))
+            return ContainsGuaranteedRunContinuationsOption(context, binary.Left) ||
+                   ContainsGuaranteedRunContinuationsOption(context, binary.Right);
+
+        return context.SemanticModel.GetSymbolInfo(
+                   expression,
+                   context.CancellationToken).Symbol is IFieldSymbol field &&
+               IsRunContinuationsField(field);
     }
 
     private static bool TryGetRunContinuationsValue(
