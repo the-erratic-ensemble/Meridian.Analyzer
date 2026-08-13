@@ -258,6 +258,7 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
                 throwStatement.Ancestors().OfType<IfStatementSyntax>().FirstOrDefault() is
                 IfStatementSyntax guard &&
                 ContainsCancellationTypeCheck(context, guard.Condition, catchSymbol) &&
+                IsUnconditionalThrowWithinGuard(throwStatement, guard) &&
                 (throwStatement.Expression is null ||
                  IsThrownCatchSymbol(context, throwStatement, catchSymbol)));
     }
@@ -281,9 +282,26 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
         CatchClauseSyntax catchClause,
         ThrowStatementSyntax throwStatement)
     {
-        return !throwStatement.Ancestors()
-            .TakeWhile(ancestor => ancestor != catchClause.Block)
-            .Any(ancestor => ancestor is IfStatementSyntax or ConditionalExpressionSyntax);
+        return !HasControlFlowBoundaryBetween(throwStatement, catchClause.Block);
+    }
+
+    private static bool IsUnconditionalThrowWithinGuard(
+        ThrowStatementSyntax throwStatement,
+        IfStatementSyntax guard)
+    {
+        return !HasControlFlowBoundaryBetween(throwStatement, guard);
+    }
+
+    private static bool HasControlFlowBoundaryBetween(
+        ThrowStatementSyntax throwStatement,
+        SyntaxNode boundary)
+    {
+        return throwStatement.Ancestors()
+            .TakeWhile(ancestor => ancestor != boundary)
+            .Any(ancestor => ancestor is IfStatementSyntax or ConditionalExpressionSyntax or
+                WhileStatementSyntax or DoStatementSyntax or ForStatementSyntax or
+                ForEachStatementSyntax or SwitchStatementSyntax or SwitchSectionSyntax or
+                SwitchExpressionSyntax or SwitchExpressionArmSyntax or TryStatementSyntax);
     }
 
     private static bool ContainsCancellationTypeCheck(
