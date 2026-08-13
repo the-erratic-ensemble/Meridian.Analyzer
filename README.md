@@ -102,6 +102,11 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Heavy inline query lambdas](docs/rules/MER0033.md) | `MER0033` | Readability | Move large query lambdas into named query steps or helpers |
 | [Direct ordinal string comparisons](docs/rules/MER0034.md) | `MER0034` | Readability | Use shared ordinal string comparison helpers |
 | [Missing route cancellation](docs/rules/MER0035.md) | `MER0035` | Reliability | Expose and forward cancellation from async route boundaries |
+| [Implicit string ordering comparer](docs/rules/MER0036.md) | `MER0036` | Reliability | Pass an explicit comparer to string-key ordering and sorted string collections |
+| [Unowned ArrayPool rentals](docs/rules/MER0037.md) | `MER0037` | Reliability | Return the rental to the same pool or transfer it to a disposable rental owner |
+| [Unpaired SemaphoreSlim acquisition](docs/rules/MER0038.md) | `MER0038` | Reliability | Release the acquired capacity in a covering finally block or releaser owner |
+| [Unbound database transaction](docs/rules/MER0039.md) | `MER0039` | Reliability | Assign the active transaction before executing the command |
+| [Escaping JsonElement lifetime](docs/rules/MER0040.md) | `MER0040` | Reliability | Clone the element before returning or storing it beyond the document scope |
 
 ## Rule-Addition Checklist
 

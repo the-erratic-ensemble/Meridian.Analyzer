@@ -40,3 +40,8 @@ MER0032 | Meridian.Readability | Warning | Extract conditional LINQ projections 
 MER0033 | Meridian.Readability | Warning | Extract heavy multi-line query lambdas into named query steps or helpers.
 MER0034 | Meridian.Readability | Warning | Prefer shared ordinal string comparison helpers.
 MER0035 | Meridian.Reliability | Warning | Expose and forward cancellation from async route boundaries.
+MER0036 | Meridian.Reliability | Warning | Require an explicit comparer for string-key ordering and sorted string collections.
+MER0037 | Meridian.Reliability | Warning | Return ArrayPool rentals exactly once or transfer them to a disposable rental owner.
+MER0038 | Meridian.Reliability | Warning | Pair successful SemaphoreSlim waits with one covering release owner.
+MER0039 | Meridian.Reliability | Warning | Bind commands created from a transaction-scoped connection before execution.
+MER0040 | Meridian.Reliability | Warning | Clone JsonElement values that escape a locally disposed JsonDocument.
