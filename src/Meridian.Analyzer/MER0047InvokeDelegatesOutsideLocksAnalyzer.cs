@@ -51,7 +51,10 @@ public sealed class MER0047InvokeDelegatesOutsideLocksAnalyzer : DiagnosticAnaly
     private static bool IsInsideLockBody(InvocationExpressionSyntax invocation)
     {
         return invocation.Ancestors().OfType<LockStatementSyntax>()
-            .Any(lockStatement => lockStatement.Statement.Span.Contains(invocation.Span));
+            .Any(lockStatement =>
+                lockStatement.Statement.Span.Contains(invocation.Span) &&
+                !invocation.Ancestors().Any(ancestor =>
+                    ancestor is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax));
     }
 
     private static bool IsDelegateInvocation(
