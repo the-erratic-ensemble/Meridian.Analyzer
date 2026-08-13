@@ -45,3 +45,11 @@ MER0037 | Meridian.Reliability | Warning | Return ArrayPool rentals exactly once
 MER0038 | Meridian.Reliability | Warning | Pair successful SemaphoreSlim waits with one covering release owner.
 MER0039 | Meridian.Reliability | Warning | Bind commands created from a transaction-scoped connection before execution.
 MER0040 | Meridian.Reliability | Warning | Clone JsonElement values that escape a locally disposed JsonDocument.
+MER0041 | Meridian.Reliability | Warning | Model literal null and default values as nullable state.
+MER0042 | Meridian.Readability | Warning | Name positional boolean literal arguments at the call site.
+MER0043 | Meridian.Reliability | Warning | Order dictionary and set data before positional selection.
+MER0044 | Meridian.Readability | Warning | State equality semantics for string-key collections and equality-based LINQ operations.
+MER0045 | Meridian.Reliability | Warning | Preserve OperationCanceledException through broad catch handlers.
+MER0046 | Meridian.Reliability | Warning | Create TaskCompletionSource instances with RunContinuationsAsynchronously.
+MER0047 | Meridian.Reliability | Warning | Invoke delegates and events after leaving a lock body.
+MER0048 | Meridian.Reliability | Warning | Use exception identity for control flow.

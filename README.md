@@ -107,6 +107,14 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Unpaired SemaphoreSlim acquisition](docs/rules/MER0038.md) | `MER0038` | Reliability | Release the acquired capacity in a covering finally block or releaser owner |
 | [Unbound database transaction](docs/rules/MER0039.md) | `MER0039` | Reliability | Assign the active transaction before executing the command |
 | [Escaping JsonElement lifetime](docs/rules/MER0040.md) | `MER0040` | Reliability | Clone the element before returning or storing it beyond the document scope |
+| [Literal null suppression](docs/rules/MER0041.md) | `MER0041` | Reliability | Model literal null and default values as nullable state |
+| [Named boolean literal arguments](docs/rules/MER0042.md) | `MER0042` | Readability | Add the parameter name at positional boolean literals |
+| [Unordered collection selection](docs/rules/MER0043.md) | `MER0043` | Reliability | Order dictionary and set data before positional selection |
+| [String equality comparers](docs/rules/MER0044.md) | `MER0044` | Readability | Pass an explicit equality comparer for string operations |
+| [Cancellation through broad catches](docs/rules/MER0045.md) | `MER0045` | Reliability | Preserve OperationCanceledException across broad catch handlers |
+| [Asynchronous TaskCompletionSource continuations](docs/rules/MER0046.md) | `MER0046` | Reliability | Create task-completion sources with asynchronous continuations |
+| [Delegate invocation outside locks](docs/rules/MER0047.md) | `MER0047` | Reliability | Invoke delegates and events after leaving a lock body |
+| [Exception identity control flow](docs/rules/MER0048.md) | `MER0048` | Reliability | Branch on exception type or structured identity |
 
 ## Rule-Addition Checklist
 
