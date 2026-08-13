@@ -38,7 +38,7 @@ dotnet build
 
 Analyzer diagnostics will surface according to the severities configured by the consumer.
 
-## Wave 1 Rule Shapes
+## Rule Examples
 
 ### MER0023: Observe Task.Run Work
 
@@ -99,6 +99,6 @@ return document.RootElement.Clone();
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Meridian.Analyzer" Version="0.2.*" PrivateAssets="all" />
+  <PackageReference Include="Meridian.Analyzer" Version="0.5.*" PrivateAssets="all" />
 </ItemGroup>
 ```

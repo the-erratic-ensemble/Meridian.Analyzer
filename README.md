@@ -14,7 +14,7 @@ Or add an explicit package reference:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Meridian.Analyzer" Version="0.2.*" PrivateAssets="all" />
+  <PackageReference Include="Meridian.Analyzer" Version="0.5.*" PrivateAssets="all" />
 </ItemGroup>
 ```
 
