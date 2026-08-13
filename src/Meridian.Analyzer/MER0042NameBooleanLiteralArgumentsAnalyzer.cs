@@ -71,11 +71,19 @@ public sealed class MER0042NameBooleanLiteralArgumentsAnalyzer : DiagnosticAnaly
         var positionalIndex = 0;
         foreach (var argument in arguments)
         {
-            var parameter = argument.NameColon is { } nameColon
-                ? parameters.FirstOrDefault(candidate =>
+            IParameterSymbol? parameter;
+            if (argument.NameColon is { } nameColon)
+            {
+                parameter = parameters.FirstOrDefault(candidate =>
                     string.Equals(candidate.Name, nameColon.Name.Identifier.ValueText,
-                        StringComparison.Ordinal))
-                : GetPositionalParameter(parameters, positionalIndex++);
+                        StringComparison.Ordinal));
+                if (parameter is not null)
+                    positionalIndex = Math.Max(positionalIndex, parameter.Ordinal + 1);
+            }
+            else
+            {
+                parameter = GetPositionalParameter(parameters, positionalIndex++);
+            }
 
             if (parameter?.Type.SpecialType != SpecialType.System_Boolean ||
                 argument.Expression is not LiteralExpressionSyntax literal ||
