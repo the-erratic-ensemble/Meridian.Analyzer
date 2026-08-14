@@ -16,12 +16,12 @@ These pieces should stay stable:
 1. Decide whether the rule belongs in this package.
 2. Pick the next stable `MERxxxx` ID.
 3. Add the analyzer implementation and keep the project dependency-light.
-4. Add positive and negative tests.
+4. Add reporting and non-reporting tests.
 5. Update `README.md`, add or update the rule file under `docs/rules/`, and revise `docs/usage-example.md` or this guide if the workflow changed.
 
-### Minimum Maintenance Contract For `MER0002+`
+### Rule Maintenance Contract
 
-When adding the second or later rule, treat these updates as mandatory in the same patch:
+When adding or materially changing a rule, keep these surfaces synchronized:
 
 - implementation file under `src/Meridian.Analyzer/`
 - behavior tests in `tests/Meridian.Analyzer.Tests/`
@@ -37,24 +37,13 @@ Before shipping a new rule, check for overlap with:
 - StyleCop
 - SDK / NetAnalyzers
 
-If another analyzer already covers the same pattern, narrow the rule instead of duplicating the diagnostic.
+Give a Meridian rule a distinct pattern when similar coverage already exists in Sonar, Roslynator, StyleCop, or SDK / NetAnalyzers.
 
-For `MER0002`, keep broader catch quality with Sonar/SDK analyzers and only own the specific nested broad-catch fallback shape.
-
-## Pilot Promotion Criteria
-
-Do not widen a pilot rule just to widen it.
-
-Promote only when:
-
-- the message points toward one clear refactor shape
-- the tests cover intended edge cases
-- the docs explain configuration and suppression clearly
-- the pilot did not show noisy false positives
+For `MER0002`, broader catch quality remains with Sonar/SDK analyzers; the Meridian rule owns the specific nested broad-catch fallback shape.
 
 ## Validation Commands
 
-Run these before handoff:
+Use these commands to validate the repository:
 
 ```bash
 dotnet restore Meridian.Analyzer.slnx
@@ -66,4 +55,4 @@ dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifac
 
 - Keep the table in `README.md` current.
 - Give each rule its own file under `docs/rules/`.
-- Keep the rule docs focused on stable behavior. Leave historical rollout notes out unless consumers need them.
+- Keep the rule docs focused on stable behavior.

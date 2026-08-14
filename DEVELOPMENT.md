@@ -12,7 +12,7 @@ dotnet restore Meridian.Analyzer.slnx
 ## Normal Edit Loop
 
 - Change analyzer code, tests, or docs.
-- Run the local checks that matter:
+- Run the local checks:
 
 ```bash
 dotnet test tests/Meridian.Analyzer.Tests/Meridian.Analyzer.Tests.csproj -c Release
@@ -32,8 +32,6 @@ When you push conventional commits to `main`, `.github/workflows/release-please.
 
 1. Opens or updates a Release Please PR with the next version and changelog changes.
 2. After that release PR is merged, packs `Meridian.Analyzer` and publishes it to `nuget.org`.
-
-`nuget.org` is public. If you later need a private package flow, use a different feed.
 
 The release workflow expects one GitHub repository secret:
 

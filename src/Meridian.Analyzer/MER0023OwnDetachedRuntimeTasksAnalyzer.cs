@@ -78,6 +78,9 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
                 case ArrowExpressionClauseSyntax arrowExpressionClause
                     when arrowExpressionClause.Parent is MethodDeclarationSyntax or LocalFunctionStatementSyntax:
                     return true;
+                case InvocationExpressionSyntax selectionInvocation
+                    when IsTaskSelection(selectionInvocation, semanticModel, cancellationToken):
+                    return false;
                 case InvocationExpressionSyntax invocation
                     when IsTaskAggregation(invocation, semanticModel, cancellationToken) ||
                          IsBackgroundTaskOwnerInvocation(invocation, semanticModel, cancellationToken):
@@ -152,6 +155,9 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
                 case AwaitExpressionSyntax:
                 case ReturnStatementSyntax:
                     return true;
+                case InvocationExpressionSyntax selectionInvocation
+                    when IsTaskSelection(selectionInvocation, semanticModel, cancellationToken):
+                    return false;
                 case InvocationExpressionSyntax invocation
                     when IsTaskAggregation(invocation, semanticModel, cancellationToken) ||
                          IsBackgroundTaskOwnerInvocation(invocation, semanticModel, cancellationToken):
@@ -181,7 +187,18 @@ public sealed class MER0023OwnDetachedRuntimeTasksAnalyzer : DiagnosticAnalyzer
         CancellationToken cancellationToken)
     {
         var method = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
-        return method?.Name is "WhenAll" or "WhenAny" &&
+        return method?.Name == "WhenAll" &&
+               method.ContainingType.Name == "Task" &&
+               method.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
+    }
+
+    private static bool IsTaskSelection(
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        CancellationToken cancellationToken)
+    {
+        var method = semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol as IMethodSymbol;
+        return method?.Name == "WhenAny" &&
                method.ContainingType.Name == "Task" &&
                method.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
     }
