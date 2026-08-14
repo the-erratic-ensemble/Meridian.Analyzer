@@ -41,15 +41,6 @@ Give a Meridian rule a distinct pattern when similar coverage already exists in 
 
 For `MER0002`, broader catch quality remains with Sonar/SDK analyzers; the Meridian rule owns the specific nested broad-catch fallback shape.
 
-## Pilot Promotion Criteria
-
-Promote a pilot rule when:
-
-- the message points toward one clear refactor shape
-- the tests cover intended edge cases
-- the docs explain configuration and suppression clearly
-- the pilot produces a useful diagnostic signal
-
 ## Validation Commands
 
 Use these commands to validate the repository:
@@ -64,4 +55,4 @@ dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifac
 
 - Keep the table in `README.md` current.
 - Give each rule its own file under `docs/rules/`.
-- Keep the rule docs focused on stable behavior. Include historical rollout notes when consumers need them.
+- Keep the rule docs focused on stable behavior.
