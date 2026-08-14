@@ -53,3 +53,15 @@ MER0045 | Meridian.Reliability | Warning | Preserve OperationCanceledException t
 MER0046 | Meridian.Reliability | Warning | Create TaskCompletionSource instances with RunContinuationsAsynchronously.
 MER0047 | Meridian.Reliability | Warning | Invoke delegates and events after leaving a lock body.
 MER0048 | Meridian.Reliability | Warning | Use exception identity for control flow.
+MER0049 | Meridian.Reliability | Warning | Make array equality semantics explicit.
+MER0050 | Meridian.Reliability | Warning | Keep runtime hash codes inside equality hashing.
+MER0051 | Meridian.Reliability | Warning | Keep asynchronous anonymous callbacks awaitable.
+MER0052 | Meridian.Reliability | Warning | Avoid invalidating standard collection enumerators during foreach.
+MER0053 | Meridian.Reliability | Warning | Guard signed Math.Abs before modulo.
+MER0054 | Meridian.Reliability | Warning | Consume the Boolean result of dictionary TryGetValue.
+MER0055 | Meridian.Reliability | Warning | State byte order for BitConverter numeric conversions.
+MER0056 | Meridian.Reliability | Warning | Validate values parsed into ordinary enums.
+MER0057 | Meridian.Reliability | Warning | State the midpoint rounding mode for Math.Round and MathF.Round.
+MER0058 | Meridian.Performance | Warning | Put a fixed ceiling on variable stackalloc sizes.
+MER0059 | Meridian.Reliability | Warning | Guard search results before index and range use.
+MER0060 | Meridian.Reliability | Warning | Slice MemoryStream buffers to their written range.

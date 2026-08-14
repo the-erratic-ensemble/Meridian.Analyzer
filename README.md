@@ -115,6 +115,18 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Asynchronous TaskCompletionSource continuations](docs/rules/MER0046.md) | `MER0046` | Reliability | Create task-completion sources with asynchronous continuations |
 | [Delegate invocation outside locks](docs/rules/MER0047.md) | `MER0047` | Reliability | Invoke delegates and events after leaving a lock body |
 | [Exception identity control flow](docs/rules/MER0048.md) | `MER0048` | Reliability | Branch on exception type or structured identity |
+| [Array reference equality](docs/rules/MER0049.md) | `MER0049` | Reliability | Compare array contents explicitly or use `ReferenceEquals` for identity |
+| [Runtime hash code boundary](docs/rules/MER0050.md) | `MER0050` | Reliability | Keep runtime hashes inside equality code and use stable hashes for durable values |
+| [Awaitable anonymous callbacks](docs/rules/MER0051.md) | `MER0051` | Reliability | Use task-returning delegates for asynchronous callbacks |
+| [Collection enumeration mutation](docs/rules/MER0052.md) | `MER0052` | Reliability | Enumerate a snapshot or separate mutation from the active `foreach` |
+| [Signed Abs before modulo](docs/rules/MER0053.md) | `MER0053` | Reliability | Handle the signed minimum before applying `Math.Abs` in modulo arithmetic |
+| [TryGetValue result](docs/rules/MER0054.md) | `MER0054` | Reliability | Consume the Boolean result or use an explicit default-on-missing operation |
+| [Binary byte order](docs/rules/MER0055.md) | `MER0055` | Reliability | Use an explicit little-endian or big-endian conversion |
+| [Parsed enum values](docs/rules/MER0056.md) | `MER0056` | Reliability | Validate ordinary enum values with `Enum.IsDefined` |
+| [Midpoint rounding](docs/rules/MER0057.md) | `MER0057` | Reliability | Pass `MidpointRounding` explicitly |
+| [Bounded variable stackalloc](docs/rules/MER0058.md) | `MER0058` | Performance | Keep runtime stack allocations under a fixed ceiling |
+| [Search result index guard](docs/rules/MER0059.md) | `MER0059` | Reliability | Check search misses before index or range use |
+| [MemoryStream buffer range](docs/rules/MER0060.md) | `MER0060` | Reliability | Slice backing buffers to the written range before they escape |
 
 ## Rule-Addition Checklist
 
