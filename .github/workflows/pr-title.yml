@@ -7,6 +7,12 @@ on:
       - edited
       - reopened
       - synchronize
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
 
 permissions:
   contents: read
@@ -14,6 +20,7 @@ permissions:
 
 jobs:
   pr-title:
+    if: ${{ github.event_name != 'pull_request_target' || (github.event.pull_request.head.ref == 'release-please--branches--main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:

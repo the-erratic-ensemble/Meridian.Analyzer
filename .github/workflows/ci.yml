@@ -2,6 +2,11 @@ name: ci
 
 on:
   pull_request:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
   push:
     branches:
       - main
@@ -15,11 +20,14 @@ permissions:
 
 jobs:
   test-and-pack:
+    if: ${{ github.event_name != 'pull_request_target' || (github.event.pull_request.head.ref == 'release-please--branches--main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
