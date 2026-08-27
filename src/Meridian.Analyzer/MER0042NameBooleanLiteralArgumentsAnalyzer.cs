@@ -85,7 +85,8 @@ public sealed class MER0042NameBooleanLiteralArgumentsAnalyzer : DiagnosticAnaly
                 parameter = GetPositionalParameter(parameters, positionalIndex++);
             }
 
-            if (parameter?.Type.SpecialType != SpecialType.System_Boolean ||
+            if (argument.NameColon is not null ||
+                parameter?.Type.SpecialType != SpecialType.System_Boolean ||
                 argument.Expression is not LiteralExpressionSyntax literal ||
                 !IsBooleanLiteral(literal))
                 continue;
