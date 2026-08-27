@@ -132,7 +132,7 @@ public sealed class MER0038PairSemaphoreAcquisitionWithReleaseAnalyzer : Diagnos
         MethodDeclarationSyntax containingMethod)
     {
         return containingMethod.DescendantNodes()
-            .OfType<ObjectCreationExpressionSyntax>()
+            .OfType<BaseObjectCreationExpressionSyntax>()
             .Where(objectCreation => objectCreation.SpanStart > waitInvocation.SpanStart)
             .Any(objectCreation =>
             {
