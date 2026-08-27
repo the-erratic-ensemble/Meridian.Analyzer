@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.6.0...v0.7.0) (2026-08-27)
+
+
+### Features
+
+* **analyzers:** add asynchronous ZIP and named record rules ([bd1d4f8](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/bd1d4f88d486f1dbb08e0acfaaa69838dc015c71))
+* **MER0062:** package named argument code fix ([96707cf](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/96707cfdb5bb604a19f1acbad2f37e0749722dfb))
+
+
+### Bug Fixes
+
+* **MER0002:** ignore filtered broad catches ([f6f097b](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/f6f097b76dc1e65599c3dea04101ef909735e8ac))
+* **MER0007:** resolve configuration receivers semantically ([05323fb](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/05323fbda900776869c48ff3452268918f9ee0aa))
+* **MER0038:** recognize target-typed owner construction ([33e88b2](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/33e88b28491234e4abd14a2909a66caa04799797))
+* **MER0042:** skip named boolean arguments ([fbc7528](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/fbc752801fe152439b38cd3eea6c7ae2b422fbe7))
+* **MER0045:** recognize exception allow-list filters ([cbde20c](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/cbde20ce04478c48d621b16d89aa0251ad81fc80))
+
 ## [0.6.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.5.0...v0.6.0) (2026-08-14)
 
 
