@@ -148,6 +148,11 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
             return ExpressionExcludesCancellation(context, binary.Left, catchSymbol) ||
                    ExpressionExcludesCancellation(context, binary.Right, catchSymbol);
 
+        if (expression is IsPatternExpressionSyntax specificExceptionFilter &&
+            IsCancellationPatternReceiver(context, specificExceptionFilter, catchSymbol) &&
+            OnlyMatchesNonCancellationExceptionTypes(context, specificExceptionFilter.Pattern))
+            return true;
+
         if (expression is PrefixUnaryExpressionSyntax
             {
                 RawKind: (int)SyntaxKind.LogicalNotExpression,
@@ -159,12 +164,56 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
 
         return expression is IsPatternExpressionSyntax isPattern &&
                isPattern.Pattern is UnaryPatternSyntax
-            {
-                RawKind: (int)SyntaxKind.NotPattern,
-                Pattern: TypePatternSyntax typePattern
-            } &&
+               {
+                   RawKind: (int)SyntaxKind.NotPattern
+               } notPattern &&
                IsCancellationPatternReceiver(context, isPattern, catchSymbol) &&
-               IsOperationCanceledException(context, typePattern.Type);
+               IsOperationCanceledException(context, notPattern.Pattern);
+    }
+
+    private static bool OnlyMatchesNonCancellationExceptionTypes(
+        SyntaxNodeAnalysisContext context,
+        PatternSyntax pattern)
+    {
+        return pattern switch
+        {
+            ParenthesizedPatternSyntax parenthesized =>
+                OnlyMatchesNonCancellationExceptionTypes(context, parenthesized.Pattern),
+            BinaryPatternSyntax binary when binary.IsKind(SyntaxKind.OrPattern) =>
+                OnlyMatchesNonCancellationExceptionTypes(context, binary.Left) &&
+                OnlyMatchesNonCancellationExceptionTypes(context, binary.Right),
+            TypePatternSyntax typePattern => IsNonCancellationExceptionType(context, typePattern.Type),
+            DeclarationPatternSyntax declarationPattern =>
+                IsNonCancellationExceptionType(context, declarationPattern.Type),
+            ConstantPatternSyntax constantPattern =>
+                IsNonCancellationExceptionType(context, constantPattern.Expression),
+            _ => false
+        };
+    }
+
+    private static bool IsNonCancellationExceptionType(
+        SyntaxNodeAnalysisContext context,
+        SyntaxNode typeSyntax)
+    {
+        var type = GetPatternType(context, typeSyntax);
+        if (!MeridianAnalyzerSemanticHelpers.IsTypeOrDerivedFrom(type, "System", "Exception"))
+            return false;
+
+        var cancellationType = context.SemanticModel.Compilation.GetTypeByMetadataName(
+            "System.OperationCanceledException");
+        return cancellationType is not null &&
+               !IsTypeOrBaseOf(type, cancellationType) &&
+               !IsTypeOrBaseOf(cancellationType, type);
+    }
+
+    private static bool IsTypeOrBaseOf(ITypeSymbol? candidate, ITypeSymbol? type)
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            if (SymbolEqualityComparer.Default.Equals(candidate, current)) return true;
+        }
+
+        return false;
     }
 
     private static bool IsCancellationPattern(
@@ -172,9 +221,8 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
         IsPatternExpressionSyntax expression,
         ISymbol catchSymbol)
     {
-        return expression.Pattern is TypePatternSyntax typePattern &&
-               IsCancellationPatternReceiver(context, expression, catchSymbol) &&
-               IsOperationCanceledException(context, typePattern.Type);
+        return IsCancellationPatternReceiver(context, expression, catchSymbol) &&
+               IsOperationCanceledException(context, expression.Pattern);
     }
 
     private static bool IsCancellationPatternReceiver(
@@ -317,8 +365,7 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
                     context.SemanticModel,
                     context.CancellationToken) is { } symbol &&
                 SymbolEqualityComparer.Default.Equals(symbol, catchSymbol) &&
-                pattern.Pattern is TypePatternSyntax typePattern &&
-                IsOperationCanceledException(context, typePattern.Type));
+                IsOperationCanceledException(context, pattern.Pattern));
     }
 
     private static bool IsThrownCatchSymbol(
@@ -336,10 +383,24 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
 
     private static bool IsOperationCanceledException(
         SyntaxNodeAnalysisContext context,
-        TypeSyntax typeSyntax)
+        SyntaxNode typeSyntax)
     {
-        return IsOperationCanceledException(
-            context.SemanticModel.GetTypeInfo(typeSyntax, context.CancellationToken).Type);
+        return IsOperationCanceledException(GetPatternType(context, typeSyntax));
+    }
+
+    private static ITypeSymbol? GetPatternType(
+        SyntaxNodeAnalysisContext context,
+        SyntaxNode typeSyntax)
+    {
+        return typeSyntax switch
+        {
+            TypeSyntax type => context.SemanticModel.GetTypeInfo(type, context.CancellationToken).Type,
+            ConstantPatternSyntax constant => GetPatternType(context, constant.Expression),
+            ExpressionSyntax expression => context.SemanticModel.GetSymbolInfo(
+                expression,
+                context.CancellationToken).Symbol as ITypeSymbol,
+            _ => null
+        };
     }
 
     private static bool IsOperationCanceledException(ITypeSymbol? type)
