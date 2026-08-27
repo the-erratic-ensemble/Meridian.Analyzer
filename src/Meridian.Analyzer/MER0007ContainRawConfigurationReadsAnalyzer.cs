@@ -60,7 +60,7 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
         if (context.Node is not InvocationExpressionSyntax invocation ||
             IsApprovedLocation(invocation.SyntaxTree.FilePath)) return;
 
-        if (IsEnvironmentRead(invocation) || IsConfigurationLookup(invocation))
+        if (IsEnvironmentRead(context, invocation) || IsConfigurationLookup(context, invocation))
             context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.GetLocation()));
     }
 
@@ -69,30 +69,49 @@ public sealed class MER0007ContainRawConfigurationReadsAnalyzer : DiagnosticAnal
         if (context.Node is not ElementAccessExpressionSyntax elementAccess ||
             IsApprovedLocation(elementAccess.SyntaxTree.FilePath)) return;
 
-        if (LooksLikeConfigurationReceiver(elementAccess.Expression.ToString()))
+        if (IsConfigurationReceiver(context, elementAccess.Expression))
             context.ReportDiagnostic(Diagnostic.Create(Rule, elementAccess.GetLocation()));
     }
 
-    private static bool IsEnvironmentRead(InvocationExpressionSyntax invocation)
+    private static bool IsEnvironmentRead(
+        SyntaxNodeAnalysisContext context,
+        InvocationExpressionSyntax invocation)
     {
-        return invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-               memberAccess.Expression.ToString() is "Environment" or "System.Environment" &&
-               memberAccess.Name.Identifier.ValueText == "GetEnvironmentVariable";
+        var method = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol as IMethodSymbol;
+        return method is not null &&
+               string.Equals(method.Name, "GetEnvironmentVariable", StringComparison.Ordinal) &&
+               string.Equals(method.ContainingType.Name, "Environment", StringComparison.Ordinal) &&
+               string.Equals(method.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal);
     }
 
-    private static bool IsConfigurationLookup(InvocationExpressionSyntax invocation)
+    private static bool IsConfigurationLookup(
+        SyntaxNodeAnalysisContext context,
+        InvocationExpressionSyntax invocation)
     {
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) return false;
 
         var memberName = memberAccess.Name.Identifier.ValueText;
         return memberName is "GetValue" or "GetSection" or "GetRequiredSection" or "GetConnectionString" &&
-               LooksLikeConfigurationReceiver(memberAccess.Expression.ToString());
+               IsConfigurationReceiver(context, memberAccess.Expression);
     }
 
-    private static bool LooksLikeConfigurationReceiver(string receiver)
+    private static bool IsConfigurationReceiver(
+        SyntaxNodeAnalysisContext context,
+        ExpressionSyntax receiver)
     {
-        return receiver.IndexOf("configuration", StringComparison.OrdinalIgnoreCase) >= 0 ||
-               receiver.IndexOf("config", StringComparison.OrdinalIgnoreCase) >= 0;
+        var type = context.SemanticModel.GetTypeInfo(receiver, context.CancellationToken).Type;
+        return IsConfigurationType(type) ||
+               type?.AllInterfaces.Any(IsConfigurationType) == true;
+    }
+
+    private static bool IsConfigurationType(ITypeSymbol? type)
+    {
+        return type is not null &&
+               string.Equals(type.Name, "IConfiguration", StringComparison.Ordinal) &&
+               string.Equals(
+                   type.ContainingNamespace?.ToDisplayString(),
+                   "Microsoft.Extensions.Configuration",
+                   StringComparison.Ordinal);
     }
 
     private static bool IsApprovedLocation(string filePath)
