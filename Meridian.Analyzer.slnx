@@ -4,5 +4,6 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Meridian.Analyzer/Meridian.Analyzer.csproj" />
+    <Project Path="src/Meridian.Analyzer.CodeFixes/Meridian.Analyzer.CodeFixes.csproj" />
   </Folder>
 </Solution>
