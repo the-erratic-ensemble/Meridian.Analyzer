@@ -127,6 +127,8 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [Bounded variable stackalloc](docs/rules/MER0058.md) | `MER0058` | Performance | Keep runtime stack allocations under a fixed ceiling |
 | [Search result index guard](docs/rules/MER0059.md) | `MER0059` | Reliability | Check search misses before index or range use |
 | [MemoryStream buffer range](docs/rules/MER0060.md) | `MER0060` | Reliability | Slice backing buffers to the written range before they escape |
+| [Asynchronous ZIP access](docs/rules/MER0061.md) | `MER0061` | Performance | Await ZIP opening APIs inside asynchronous code |
+| [Named record construction arguments](docs/rules/MER0062.md) | `MER0062` | Readability | Name every argument on record-class constructions with at least three arguments |
 
 ## Rule-Addition Checklist
 
