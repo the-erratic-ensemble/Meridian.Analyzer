@@ -46,7 +46,7 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
 
         if (!IsNestedInsideAnotherTryBlock(tryStatement)) return;
 
-        if (!HasBroadCatchThatContinuesControlFlow(tryStatement)) return;
+        if (!HasBroadCatchThatContinuesControlFlow(context, tryStatement)) return;
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, tryStatement.TryKeyword.GetLocation()));
     }
@@ -63,11 +63,13 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
         return false;
     }
 
-    private static bool HasBroadCatchThatContinuesControlFlow(TryStatementSyntax tryStatement)
+    private static bool HasBroadCatchThatContinuesControlFlow(
+        SyntaxNodeAnalysisContext context,
+        TryStatementSyntax tryStatement)
     {
         foreach (var catchClause in tryStatement.Catches)
         {
-            if (!IsBroadCatchClause(catchClause)) continue;
+            if (!IsBroadCatchClause(context, catchClause)) continue;
 
             if (CatchTerminatesControlFlow(catchClause.Block)) continue;
 
@@ -79,20 +81,86 @@ public sealed class MER0002DoNotNestTryCatchInTryBlockAnalyzer : DiagnosticAnaly
         return false;
     }
 
-    private static bool IsBroadCatchClause(CatchClauseSyntax catchClause)
+    private static bool IsBroadCatchClause(
+        SyntaxNodeAnalysisContext context,
+        CatchClauseSyntax catchClause)
     {
         if (catchClause.Declaration is null) return true;
 
-        return catchClause.Declaration.Type switch
+        var type = context.SemanticModel.GetTypeInfo(
+            catchClause.Declaration.Type,
+            context.CancellationToken).Type;
+        var isException = type is not null &&
+                          string.Equals(type.Name, "Exception", StringComparison.Ordinal) &&
+                          string.Equals(
+                              type.ContainingNamespace?.ToDisplayString(),
+                              "System",
+                              StringComparison.Ordinal);
+
+        return isException && !HasSpecificExceptionFilter(context, catchClause);
+    }
+
+    private static bool HasSpecificExceptionFilter(
+        SyntaxNodeAnalysisContext context,
+        CatchClauseSyntax catchClause)
+    {
+        if (catchClause.Filter?.FilterExpression is not IsPatternExpressionSyntax isPattern ||
+            catchClause.Declaration is null)
+            return false;
+
+        var catchSymbol = context.SemanticModel.GetDeclaredSymbol(
+            catchClause.Declaration,
+            context.CancellationToken);
+        var receiverSymbol = MeridianAnalyzerSemanticHelpers.GetReferencedSymbol(
+            isPattern.Expression,
+            context.SemanticModel,
+            context.CancellationToken);
+
+        return catchSymbol is not null &&
+               receiverSymbol is not null &&
+               SymbolEqualityComparer.Default.Equals(catchSymbol, receiverSymbol) &&
+               OnlyMatchesSpecificExceptionTypes(context, isPattern.Pattern);
+    }
+
+    private static bool OnlyMatchesSpecificExceptionTypes(
+        SyntaxNodeAnalysisContext context,
+        PatternSyntax pattern)
+    {
+        return pattern switch
         {
-            IdentifierNameSyntax { Identifier.ValueText: "Exception" } => true,
-            QualifiedNameSyntax
-            {
-                Left: IdentifierNameSyntax { Identifier.ValueText: "System" },
-                Right: IdentifierNameSyntax { Identifier.ValueText: "Exception" }
-            } => true,
+            ParenthesizedPatternSyntax parenthesized =>
+                OnlyMatchesSpecificExceptionTypes(context, parenthesized.Pattern),
+            BinaryPatternSyntax binary when binary.IsKind(SyntaxKind.OrPattern) =>
+                OnlyMatchesSpecificExceptionTypes(context, binary.Left) &&
+                OnlyMatchesSpecificExceptionTypes(context, binary.Right),
+            TypePatternSyntax typePattern => IsSpecificExceptionType(context, typePattern.Type),
+            DeclarationPatternSyntax declarationPattern =>
+                IsSpecificExceptionType(context, declarationPattern.Type),
+            ConstantPatternSyntax constantPattern =>
+                IsSpecificExceptionType(context, constantPattern.Expression),
             _ => false
         };
+    }
+
+    private static bool IsSpecificExceptionType(
+        SyntaxNodeAnalysisContext context,
+        SyntaxNode typeSyntax)
+    {
+        var type = typeSyntax switch
+        {
+            TypeSyntax syntaxType => context.SemanticModel.GetTypeInfo(
+                syntaxType,
+                context.CancellationToken).Type,
+            ExpressionSyntax expression => context.SemanticModel.GetSymbolInfo(
+                expression,
+                context.CancellationToken).Symbol as ITypeSymbol,
+            _ => null
+        };
+        if (type is null) return false;
+
+        return MeridianAnalyzerSemanticHelpers.IsTypeOrDerivedFrom(type, "System", "Exception") &&
+               !(string.Equals(type.Name, "Exception", StringComparison.Ordinal) &&
+                 string.Equals(type.ContainingNamespace?.ToDisplayString(), "System", StringComparison.Ordinal));
     }
 
     private static bool CatchTerminatesControlFlow(BlockSyntax catchBlock)
