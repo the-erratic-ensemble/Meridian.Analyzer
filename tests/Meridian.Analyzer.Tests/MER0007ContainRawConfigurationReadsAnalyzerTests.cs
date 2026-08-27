@@ -13,7 +13,7 @@ public sealed class FeatureService
 {
     public string? Read()
     {
-        return Environment.GetEnvironmentVariable("MERIDIAN_FEATURE_FLAG");
+        return System.Environment.GetEnvironmentVariable("MERIDIAN_FEATURE_FLAG");
     }
 }
 """;
