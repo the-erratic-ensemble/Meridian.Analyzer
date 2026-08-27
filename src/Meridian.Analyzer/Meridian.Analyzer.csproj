@@ -24,10 +24,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Meridian.Analyzer.CodeFixes/Meridian.Analyzer.CodeFixes.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="_._" Pack="true" PackagePath="lib/netstandard2.0" Visible="false" />
     <None Include="../../README.md" Link="README.md" Pack="true" PackagePath="\" />
     <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(OutputPath)$(AssemblyName).pdb" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+    <None Include="../Meridian.Analyzer.CodeFixes/bin/$(Configuration)/netstandard2.0/Meridian.Analyzer.CodeFixes.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+    <None Include="../Meridian.Analyzer.CodeFixes/bin/$(Configuration)/netstandard2.0/Meridian.Analyzer.CodeFixes.pdb"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false"
+          Condition="Exists('../Meridian.Analyzer.CodeFixes/bin/$(Configuration)/netstandard2.0/Meridian.Analyzer.CodeFixes.pdb')" />
   </ItemGroup>
 
 </Project>
