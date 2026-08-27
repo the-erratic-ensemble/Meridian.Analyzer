@@ -65,3 +65,5 @@ MER0057 | Meridian.Reliability | Warning | State the midpoint rounding mode for 
 MER0058 | Meridian.Performance | Warning | Put a fixed ceiling on variable stackalloc sizes.
 MER0059 | Meridian.Reliability | Warning | Guard search results before index and range use.
 MER0060 | Meridian.Reliability | Warning | Slice MemoryStream buffers to their written range.
+MER0061 | Meridian.Performance | Warning | Use asynchronous ZIP opening APIs inside asynchronous code.
+MER0062 | Meridian.Readability | Warning | Name every argument on record-class constructions with at least three arguments.
