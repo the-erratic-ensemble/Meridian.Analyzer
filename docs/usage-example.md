@@ -44,6 +44,10 @@ dotnet_diagnostic.MER0057.severity = warning
 dotnet_diagnostic.MER0058.severity = warning
 dotnet_diagnostic.MER0059.severity = warning
 dotnet_diagnostic.MER0060.severity = warning
+dotnet_diagnostic.MER0061.severity = warning
+dotnet_diagnostic.MER0062.severity = warning
+dotnet_diagnostic.MER0063.severity = warning
+meridian_forbidden_identifier_words = resolve|resolved|prepare|prepared
 ```
 
 Start with a small subset and widen later if the results stay useful.
@@ -57,6 +61,24 @@ dotnet build
 ```
 
 Analyzer diagnostics will surface according to the severities configured by the consumer.
+
+## Configure Forbidden Identifier Words
+
+`MER0063` reads its complete vocabulary from `.editorconfig`:
+
+```ini
+[*.cs]
+dotnet_diagnostic.MER0063.severity = warning
+meridian_forbidden_identifier_words = resolve|resolved|prepare|prepared
+```
+
+Reviewed full-name exceptions use exact, case-sensitive entries:
+
+```ini
+meridian_forbidden_identifier_allowed_names = AllReferencesResolved
+```
+
+The analyzer uses case-insensitive substring matching for forbidden values. An identifier such as `UnresolvedCount` therefore matches `resolved`.
 
 ## Rule Examples
 
