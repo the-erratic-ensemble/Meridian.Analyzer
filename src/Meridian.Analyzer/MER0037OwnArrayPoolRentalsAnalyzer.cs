@@ -44,7 +44,8 @@ public sealed class MER0037OwnArrayPoolRentalsAnalyzer : DiagnosticAnalyzer
             !IsArrayPoolRent(context, rentInvocation))
             return;
 
-        if (IsTransferredToRentalOwner(context, rentInvocation)) return;
+        if (IsTransferredToRentalOwner(context, rentInvocation) ||
+            IsConstructorOwnedRental(context, rentInvocation)) return;
 
         var local = GetAssignedLocal(context, rentInvocation);
         if (local is null ||
@@ -85,6 +86,75 @@ public sealed class MER0037OwnArrayPoolRentalsAnalyzer : DiagnosticAnalyzer
                string.Equals(method.ContainingType?.Name, "ArrayPool", StringComparison.Ordinal) &&
                string.Equals(method.ContainingNamespace?.ToDisplayString(), "System.Buffers",
                    StringComparison.Ordinal);
+    }
+
+    private static bool IsConstructorOwnedRental(
+        SyntaxNodeAnalysisContext context, InvocationExpressionSyntax rent)
+    {
+        if (rent.Parent is not AssignmentExpressionSyntax assignment || assignment.Right != rent ||
+            assignment.Parent is not ExpressionStatementSyntax statement ||
+            statement.Parent is not BlockSyntax { Parent: ConstructorDeclarationSyntax constructor } body ||
+            body.Statements.LastOrDefault() != statement ||
+            context.SemanticModel.GetSymbolInfo(assignment.Left, context.CancellationToken).Symbol is not
+                IFieldSymbol { IsStatic: false } field ||
+            rent.Expression is not MemberAccessExpressionSyntax rentAccess ||
+            context.SemanticModel.GetSymbolInfo(rentAccess.Expression, context.CancellationToken).Symbol is not
+                IParameterSymbol poolParameter ||
+            context.SemanticModel.GetDeclaredSymbol(constructor, context.CancellationToken) is not { } ownerConstructor ||
+            !SymbolEqualityComparer.Default.Equals(field.ContainingType, ownerConstructor.ContainingType) ||
+            assignment.Left is not IdentifierNameSyntax and not MemberAccessExpressionSyntax
+                { Expression: ThisExpressionSyntax })
+            return false;
+
+        var poolFields = MeridianResourceOwnershipHelpers.GetStoredFields(
+                poolParameter, context.SemanticModel, context.CancellationToken)
+            .Where(pool => pool.IsReadOnly).ToArray();
+        foreach (var disposal in MeridianResourceOwnershipHelpers.GetDisposalMethods(
+                     ownerConstructor.ContainingType, context.CancellationToken))
+        {
+            var model = context.SemanticModel;
+            if (disposal.SyntaxTree != model.SyntaxTree) continue;
+            if (disposal.Body is not { Statements.Count: 2 } disposeBody ||
+                disposeBody.Statements[0] is not LocalDeclarationStatementSyntax localDeclaration ||
+                localDeclaration.Declaration.Variables.Count != 1 ||
+                localDeclaration.Declaration.Variables[0] is not { Initializer.Value: { } take } local ||
+                !MeridianResourceOwnershipHelpers.IsAtomicTake(take, field, model, context.CancellationToken) ||
+                disposeBody.Statements[1] is not IfStatementSyntax { Else: null } guard ||
+                guard.Condition is not IsPatternExpressionSyntax
+                {
+                    Pattern: UnaryPatternSyntax
+                    {
+                        RawKind: (int)SyntaxKind.NotPattern,
+                        Pattern: ConstantPatternSyntax { Expression.RawKind: (int)SyntaxKind.NullLiteralExpression }
+                    }
+                } condition ||
+                !SymbolEqualityComparer.Default.Equals(
+                    model.GetSymbolInfo(condition.Expression, context.CancellationToken).Symbol,
+                    model.GetDeclaredSymbol(local, context.CancellationToken)))
+                continue;
+
+            var returnStatement = guard.Statement is BlockSyntax { Statements.Count: 1 } block
+                ? block.Statements[0] : guard.Statement;
+            if (returnStatement is not ExpressionStatementSyntax
+                {
+                    Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax access } returned
+                } ||
+                model.GetSymbolInfo(returned, context.CancellationToken).Symbol is not
+                    IMethodSymbol { Name: "Return" } returnMethod ||
+                !MeridianAnalyzerSemanticHelpers.IsTypeOrDerivedFrom(
+                    returnMethod.ContainingType, "System.Buffers", "ArrayPool") ||
+                !poolFields.Any(pool => SymbolEqualityComparer.Default.Equals(
+                    model.GetSymbolInfo(access.Expression, context.CancellationToken).Symbol, pool)) ||
+                returned.ArgumentList.Arguments.FirstOrDefault() is not { } rentalArgument ||
+                !SymbolEqualityComparer.Default.Equals(
+                    model.GetSymbolInfo(rentalArgument.Expression, context.CancellationToken).Symbol,
+                    model.GetDeclaredSymbol(local, context.CancellationToken)))
+                continue;
+
+            return true;
+        }
+
+        return false;
     }
 
     private static bool IsArrayPoolReturn(
