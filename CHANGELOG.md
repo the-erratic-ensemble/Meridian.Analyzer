@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.7.0...v0.8.0) (2026-10-06)
+
+
+### Features
+
+* **analyzer:** add resource ownership and MER0063 rules ([32a5f58](https://github.com/the-erratic-ensemble/Meridian.Analyzer/commit/32a5f584f80ae45364f9c1701b9a9cd94aaf689c))
+
 ## [0.7.0](https://github.com/the-erratic-ensemble/Meridian.Analyzer/compare/v0.6.0...v0.7.0) (2026-08-27)
 
 
