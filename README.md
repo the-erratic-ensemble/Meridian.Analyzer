@@ -129,6 +129,7 @@ You can enable as many or as few rules as you want. Each rule doc explains what 
 | [MemoryStream buffer range](docs/rules/MER0060.md) | `MER0060` | Reliability | Slice backing buffers to the written range before they escape |
 | [Asynchronous ZIP access](docs/rules/MER0061.md) | `MER0061` | Performance | Await ZIP opening APIs inside asynchronous code |
 | [Named record construction arguments](docs/rules/MER0062.md) | `MER0062` | Readability | Name every argument on record-class constructions with at least three arguments |
+| [Forbidden identifier words](docs/rules/MER0063.md) | `MER0063` | Readability | Review the declaration's owner and structure, then keep, rename, move, merge, inline, or delete |
 
 ## Rule-Addition Checklist
 

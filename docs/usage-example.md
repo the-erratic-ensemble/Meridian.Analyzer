@@ -44,6 +44,11 @@ dotnet_diagnostic.MER0057.severity = warning
 dotnet_diagnostic.MER0058.severity = warning
 dotnet_diagnostic.MER0059.severity = warning
 dotnet_diagnostic.MER0060.severity = warning
+dotnet_diagnostic.MER0061.severity = warning
+dotnet_diagnostic.MER0062.severity = warning
+dotnet_diagnostic.MER0063.severity = warning
+meridian_forbidden_identifier_words = resolve|resolved|prepare|prepared
+meridian_forbidden_identifier_suffixes = opening|result
 ```
 
 Start with a small subset and widen later if the results stay useful.
@@ -57,6 +62,35 @@ dotnet build
 ```
 
 Analyzer diagnostics will surface according to the severities configured by the consumer.
+
+## Configure Forbidden Identifier Words
+
+`MER0063` reads its complete vocabulary from `.editorconfig`:
+
+```ini
+[*.cs]
+dotnet_diagnostic.MER0063.severity = warning
+meridian_forbidden_identifier_words = resolve|resolved|prepare|prepared
+meridian_forbidden_identifier_suffixes = opening|result
+```
+
+Reviewed full-name exceptions use exact, case-sensitive entries:
+
+```ini
+meridian_forbidden_identifier_allowed_names = AllReferencesResolved
+```
+
+Repeated domain or provider terms use case-insensitive fragments:
+
+```ini
+meridian_forbidden_identifier_allowed_fragments = BuildUp
+```
+
+A forbidden occurrence is exempt only when its complete span is inside the configured fragment. Other forbidden occurrences in the same identifier remain reportable.
+
+The analyzer uses case-insensitive substring matching for forbidden words. An identifier such as `UnresolvedCount` therefore matches `resolved`.
+
+Forbidden suffixes use case-insensitive end-of-identifier matching. `PlayerOpening` matches `opening`, while `OpeningHistory` does not.
 
 ## Rule Examples
 

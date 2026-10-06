@@ -96,9 +96,33 @@ public sealed class MER0045PreserveCancellationThroughBroadCatchAnalyzer : Diagn
             var typeInfo = context.SemanticModel.GetTypeInfo(
                 argument.Expression,
                 context.CancellationToken);
-            return IsCancellationToken(typeInfo.Type) ||
-                   IsCancellationToken(typeInfo.ConvertedType);
+            return (IsCancellationToken(typeInfo.Type) ||
+                    IsCancellationToken(typeInfo.ConvertedType)) &&
+                   !IsNonCancelableToken(context, argument.Expression);
         });
+    }
+
+    private static bool IsNonCancelableToken(
+        SyntaxNodeAnalysisContext context,
+        ExpressionSyntax expression)
+    {
+        expression = UnwrapParentheses(expression);
+        if (expression.IsKind(SyntaxKind.DefaultLiteralExpression) ||
+            expression is DefaultExpressionSyntax)
+            return true;
+
+        if (context.SemanticModel.GetSymbolInfo(expression, context.CancellationToken).Symbol is
+            IPropertySymbol { Name: "None", IsStatic: true } property &&
+            IsCancellationToken(property.ContainingType))
+            return true;
+
+        return expression is BaseObjectCreationExpressionSyntax creation &&
+               IsCancellationToken(context.SemanticModel.GetTypeInfo(creation, context.CancellationToken).Type) &&
+               (creation.ArgumentList is null || creation.ArgumentList.Arguments.Count == 0 ||
+                creation.ArgumentList.Arguments.Count == 1 &&
+                context.SemanticModel.GetConstantValue(
+                    creation.ArgumentList.Arguments[0].Expression, context.CancellationToken) is
+                    { HasValue: true, Value: false });
     }
 
     private static bool IsCancellationToken(ITypeSymbol? type)

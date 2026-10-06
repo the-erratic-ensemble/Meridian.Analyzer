@@ -67,3 +67,4 @@ MER0059 | Meridian.Reliability | Warning | Guard search results before index and
 MER0060 | Meridian.Reliability | Warning | Slice MemoryStream buffers to their written range.
 MER0061 | Meridian.Performance | Warning | Use asynchronous ZIP opening APIs inside asynchronous code.
 MER0062 | Meridian.Readability | Warning | Name every argument on record-class constructions with at least three arguments.
+MER0063 | Meridian.Readability | Warning | Review locally authored declaration names that contain configured forbidden vocabulary.
