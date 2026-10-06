@@ -26,12 +26,13 @@ dotnet pack src/Meridian.Analyzer/Meridian.Analyzer.csproj -c Release -o artifac
 
 ## Release Flow
 
-`main` is the release branch.
-
-When you push conventional commits to `main`, `.github/workflows/release-please.yml` does two jobs:
-
-1. Opens or updates a Release Please PR with the next version and changelog changes.
-2. After that release PR is merged, packs `Meridian.Analyzer` and publishes it to `nuget.org`.
+1. Open a PR into protected `main` using Conventional Commits.
+2. Wait for `pr-title` and `test-and-pack`, then squash-merge the PR so `main`
+   remains linear.
+3. Google Release Please opens a release PR with the next version, changelog,
+   and manifest update. Review it, wait for its checks, and squash-merge it.
+4. Release Please creates the GitHub tag/release, packs the analyzer, and
+   publishes `Meridian.Analyzer` to NuGet.
 
 The release workflow expects one GitHub repository secret:
 
