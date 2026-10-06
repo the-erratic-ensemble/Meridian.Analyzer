@@ -12,7 +12,9 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
     public const string DiagnosticId = "MER0063";
 
     private const string ForbiddenWordsOption = "meridian_forbidden_identifier_words";
+    private const string ForbiddenSuffixesOption = "meridian_forbidden_identifier_suffixes";
     private const string AllowedNamesOption = "meridian_forbidden_identifier_allowed_names";
+    private const string AllowedFragmentsOption = "meridian_forbidden_identifier_allowed_fragments";
 
     private static readonly LocalizableString Title = "Review forbidden identifier word";
 
@@ -46,10 +48,16 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
         if (MeridianAnalyzerRuleHelpers.IsTestPath(tree.FilePath)) return;
 
         var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
-        var forbiddenWords = ReadConfiguredValues(options, ForbiddenWordsOption, StringComparer.OrdinalIgnoreCase);
-        if (forbiddenWords.Length == 0) return;
+        var forbiddenWords = new ForbiddenVocabulary(
+            ReadConfiguredValues(options, ForbiddenWordsOption, StringComparer.OrdinalIgnoreCase),
+            ReadConfiguredValues(options, ForbiddenSuffixesOption, StringComparer.OrdinalIgnoreCase));
+        if (forbiddenWords.IsEmpty) return;
 
         var allowedNames = ReadConfiguredValues(options, AllowedNamesOption, StringComparer.Ordinal);
+        var allowedFragments = ReadConfiguredValues(
+            options,
+            AllowedFragmentsOption,
+            StringComparer.OrdinalIgnoreCase);
         var root = tree.GetRoot(context.CancellationToken);
 
         foreach (var node in root.DescendantNodesAndSelf())
@@ -59,67 +67,191 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
             switch (node)
             {
                 case BaseNamespaceDeclarationSyntax namespaceDeclaration:
-                    AnalyzeNamespace(context, namespaceDeclaration, forbiddenWords, allowedNames);
+                    AnalyzeNamespace(
+                        context,
+                        namespaceDeclaration,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case BaseTypeDeclarationSyntax typeDeclaration:
-                    AnalyzeIdentifier(context, typeDeclaration, typeDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        typeDeclaration,
+                        typeDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case DelegateDeclarationSyntax delegateDeclaration:
-                    AnalyzeIdentifier(context, delegateDeclaration, delegateDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        delegateDeclaration,
+                        delegateDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case MethodDeclarationSyntax methodDeclaration:
-                    AnalyzeIdentifier(context, methodDeclaration, methodDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        methodDeclaration,
+                        methodDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case LocalFunctionStatementSyntax localFunction:
-                    AnalyzeIdentifier(context, localFunction, localFunction.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        localFunction,
+                        localFunction.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case PropertyDeclarationSyntax propertyDeclaration:
-                    AnalyzeIdentifier(context, propertyDeclaration, propertyDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        propertyDeclaration,
+                        propertyDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case EventDeclarationSyntax eventDeclaration:
-                    AnalyzeIdentifier(context, eventDeclaration, eventDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        eventDeclaration,
+                        eventDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case EnumMemberDeclarationSyntax enumMember:
-                    AnalyzeIdentifier(context, enumMember, enumMember.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        enumMember,
+                        enumMember.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case VariableDeclaratorSyntax variable:
-                    AnalyzeIdentifier(context, variable, variable.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        variable,
+                        variable.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case ParameterSyntax parameter:
-                    AnalyzeIdentifier(context, parameter, parameter.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        parameter,
+                        parameter.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case TypeParameterSyntax typeParameter:
-                    AnalyzeIdentifier(context, typeParameter, typeParameter.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        typeParameter,
+                        typeParameter.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case ForEachStatementSyntax forEachStatement:
-                    AnalyzeIdentifier(context, forEachStatement, forEachStatement.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        forEachStatement,
+                        forEachStatement.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case CatchDeclarationSyntax catchDeclaration:
-                    AnalyzeIdentifier(context, catchDeclaration, catchDeclaration.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        catchDeclaration,
+                        catchDeclaration.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case SingleVariableDesignationSyntax designation:
-                    AnalyzeIdentifier(context, designation, designation.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        designation,
+                        designation.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case FromClauseSyntax fromClause:
-                    AnalyzeIdentifier(context, fromClause, fromClause.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        fromClause,
+                        fromClause.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case LetClauseSyntax letClause:
-                    AnalyzeIdentifier(context, letClause, letClause.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        letClause,
+                        letClause.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case JoinClauseSyntax joinClause:
-                    AnalyzeIdentifier(context, joinClause, joinClause.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        joinClause,
+                        joinClause.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case JoinIntoClauseSyntax joinIntoClause:
-                    AnalyzeIdentifier(context, joinIntoClause, joinIntoClause.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        joinIntoClause,
+                        joinIntoClause.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case QueryContinuationSyntax continuation:
-                    AnalyzeIdentifier(context, continuation, continuation.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        continuation,
+                        continuation.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case TupleElementSyntax tupleElement:
-                    AnalyzeIdentifier(context, tupleElement, tupleElement.Identifier, forbiddenWords, allowedNames);
+                    AnalyzeIdentifier(
+                        context,
+                        tupleElement,
+                        tupleElement.Identifier,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
                 case TupleExpressionSyntax tupleExpression:
-                    AnalyzeTupleExpression(context, tupleExpression, forbiddenWords, allowedNames);
+                    AnalyzeTupleExpression(
+                        context,
+                        tupleExpression,
+                        forbiddenWords,
+                        allowedNames,
+                        allowedFragments);
                     break;
             }
         }
@@ -128,21 +260,30 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
     private static void AnalyzeNamespace(
         SemanticModelAnalysisContext context,
         BaseNamespaceDeclarationSyntax declaration,
-        string[] forbiddenWords,
-        string[] allowedNames)
+        ForbiddenVocabulary forbiddenWords,
+        string[] allowedNames,
+        string[] allowedFragments)
     {
         foreach (var identifier in declaration.Name.DescendantTokens().Where(token => token.RawKind != 0))
         {
             if (!identifier.IsKind(SyntaxKind.IdentifierToken)) continue;
-            if (AnalyzeIdentifier(context, declaration, identifier, forbiddenWords, allowedNames)) return;
+            if (AnalyzeIdentifier(
+                    context,
+                    declaration,
+                    identifier,
+                    forbiddenWords,
+                    allowedNames,
+                    allowedFragments))
+                return;
         }
     }
 
     private static void AnalyzeTupleExpression(
         SemanticModelAnalysisContext context,
         TupleExpressionSyntax expression,
-        string[] forbiddenWords,
-        string[] allowedNames)
+        ForbiddenVocabulary forbiddenWords,
+        string[] allowedNames,
+        string[] allowedFragments)
     {
         foreach (var argument in expression.Arguments)
         {
@@ -153,6 +294,7 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
                     nameColon.Name.Identifier,
                     forbiddenWords,
                     allowedNames,
+                    allowedFragments,
                     inspectOwnership: false);
         }
     }
@@ -161,8 +303,9 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
         SemanticModelAnalysisContext context,
         SyntaxNode declaration,
         SyntaxToken identifier,
-        string[] forbiddenWords,
+        ForbiddenVocabulary forbiddenWords,
         string[] allowedNames,
+        string[] allowedFragments,
         bool inspectOwnership = true)
     {
         if (identifier.RawKind == 0 || identifier.IsMissing) return false;
@@ -170,7 +313,7 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
         var name = identifier.ValueText;
         if (allowedNames.Contains(name, StringComparer.Ordinal)) return false;
 
-        var forbiddenWord = FindForbiddenWord(name, forbiddenWords);
+        var forbiddenWord = FindForbiddenWord(name, forbiddenWords, allowedFragments);
         if (forbiddenWord is null) return false;
 
         if (inspectOwnership)
@@ -185,23 +328,79 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
         return true;
     }
 
-    private static string? FindForbiddenWord(string name, string[] forbiddenWords)
+    private static string? FindForbiddenWord(
+        string name,
+        ForbiddenVocabulary forbiddenWords,
+        string[] allowedFragments)
     {
         string? match = null;
         var matchIndex = int.MaxValue;
 
-        foreach (var forbiddenWord in forbiddenWords)
+        foreach (var forbiddenWord in forbiddenWords.SubstringMatches)
         {
-            var index = name.IndexOf(forbiddenWord, StringComparison.OrdinalIgnoreCase);
-            if (index < 0 || index > matchIndex ||
-                index == matchIndex && match is not null && forbiddenWord.Length <= match.Length)
+            var searchIndex = 0;
+            while (searchIndex <= name.Length - forbiddenWord.Length)
+            {
+                var index = name.IndexOf(
+                    forbiddenWord,
+                    searchIndex,
+                    StringComparison.OrdinalIgnoreCase);
+                if (index < 0) break;
+
+                if (!IsWithinAllowedFragment(name, index, forbiddenWord.Length, allowedFragments) &&
+                    (index < matchIndex ||
+                     index == matchIndex && (match is null || forbiddenWord.Length > match.Length)))
+                {
+                    match = forbiddenWord;
+                    matchIndex = index;
+                }
+
+                searchIndex = index + 1;
+            }
+        }
+
+        foreach (var forbiddenSuffix in forbiddenWords.SuffixMatches)
+        {
+            var index = name.Length - forbiddenSuffix.Length;
+            if (index < 0 ||
+                !name.EndsWith(forbiddenSuffix, StringComparison.OrdinalIgnoreCase) ||
+                IsWithinAllowedFragment(name, index, forbiddenSuffix.Length, allowedFragments) ||
+                index > matchIndex ||
+                index == matchIndex && match is not null && forbiddenSuffix.Length <= match.Length)
                 continue;
 
-            match = forbiddenWord;
+            match = forbiddenSuffix;
             matchIndex = index;
         }
 
         return match;
+    }
+
+    private static bool IsWithinAllowedFragment(
+        string name,
+        int forbiddenIndex,
+        int forbiddenLength,
+        string[] allowedFragments)
+    {
+        var forbiddenEnd = forbiddenIndex + forbiddenLength;
+
+        foreach (var allowedFragment in allowedFragments)
+        {
+            var searchIndex = 0;
+            while (searchIndex <= forbiddenIndex)
+            {
+                var fragmentIndex = name.IndexOf(
+                    allowedFragment,
+                    searchIndex,
+                    StringComparison.OrdinalIgnoreCase);
+                if (fragmentIndex < 0 || fragmentIndex > forbiddenIndex) break;
+                if (fragmentIndex + allowedFragment.Length >= forbiddenEnd) return true;
+
+                searchIndex = fragmentIndex + 1;
+            }
+        }
+
+        return false;
     }
 
     private static string[] ReadConfiguredValues(
@@ -267,5 +466,20 @@ public sealed class MER0063ReviewForbiddenIdentifierWordsAnalyzer : DiagnosticAn
             .First();
 
         return first.SyntaxTree == declaration.SyntaxTree && first.Span == declaration.Span;
+    }
+
+    private sealed class ForbiddenVocabulary
+    {
+        public ForbiddenVocabulary(string[] substringMatches, string[] suffixMatches)
+        {
+            SubstringMatches = substringMatches;
+            SuffixMatches = suffixMatches;
+        }
+
+        public string[] SubstringMatches { get; }
+
+        public string[] SuffixMatches { get; }
+
+        public bool IsEmpty => SubstringMatches.Length == 0 && SuffixMatches.Length == 0;
     }
 }
