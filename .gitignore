@@ -6,3 +6,4 @@ TestResults/
 *.suo
 *.nupkg
 *.snupkg
+.DEV_RELEASE_HOWTO.md
